@@ -28,7 +28,10 @@ classifiers = [
 ]
 
 # No runtime dependencies - pure Python library
-dependencies = []
+dependencies = [
+    "PySide6",
+    "qtawesome"
+]
 
 [project.optional-dependencies]
 dev = [
