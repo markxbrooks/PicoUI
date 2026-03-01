@@ -8,14 +8,7 @@ and related helpers with consistent typing and behavior.
 from typing import List, Optional, Union
 
 from PySide6.QtCore import QMargins
-from PySide6.QtWidgets import (
-    QFormLayout,
-    QHBoxLayout,
-    QLabel,
-    QLayout,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QLayout, QVBoxLayout, QWidget
 
 
 def create_layout(
@@ -145,9 +138,7 @@ def create_widget_with_layout(layout: QVBoxLayout) -> QWidget:
 
 
 def create_layout_with_inner_layouts(
-    inner_layouts: List[QLayout],
-    vertical: bool = True,
-    stretch: bool = True
+    inner_layouts: List[QLayout], vertical: bool = True, stretch: bool = True
 ) -> QVBoxLayout:
     """
     Create a layout that contains a list of inner layouts, plus a bottom stretch.

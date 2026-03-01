@@ -9,6 +9,7 @@ from dataclasses import dataclass
 @dataclass
 class WidgetType:
     """WidgetType"""
+
     LINEEDIT: str = "line_edit"
     COMBOBOX: str = "combobox"
     CHECKBOX: str = "checkbox"

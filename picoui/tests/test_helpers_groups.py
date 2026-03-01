@@ -17,6 +17,10 @@ project_root = Path(__file__).resolve().parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+import unittest
+
+from picoui.helpers.groups import build_group, group_from_definition, group_with_layout
+from picoui.helpers.layout import create_layout, create_layout_with_items
 from PySide6.QtWidgets import (
     QApplication,
     QFormLayout,
@@ -27,11 +31,6 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-import unittest
-
-from picoui.helpers.groups import build_group, group_from_definition, group_with_layout
-from picoui.helpers.layout import create_layout, create_layout_with_items
 
 
 def get_qapp():
@@ -153,9 +152,7 @@ class TestGroupFromDefinition(unittest.TestCase):
     def test_set_attr_custom_attr_name(self):
         key = SimpleDefinition(label="X", attr_name="default_name")
         container = type("C", (), {})()
-        group = group_from_definition(
-            key, None, set_attr=container, attr_name="custom_name"
-        )
+        group = group_from_definition(key, None, set_attr=container, attr_name="custom_name")
         self.assertFalse(hasattr(container, "default_name"))
         self.assertIs(getattr(container, "custom_name"), group)
 

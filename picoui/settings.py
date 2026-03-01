@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import logging
 from typing import ClassVar
-from PySide6.QtCore import QSettings
 
 from decologr import Decologr as log
-from jdxi_editor.project import __project__, __program__
+from PySide6.QtCore import QSettings
+
+from jdxi_editor.project import __program__, __project__
 
 
 class PicoUIConstants:

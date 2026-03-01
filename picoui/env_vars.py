@@ -11,5 +11,6 @@ system.
 
 class PicoUIEnvVars:
     """Centralised keys/constants for environment vars."""
+
     PATH = "PATH"
     LD_LIBRARY_PATH = "LD_LIBRARY_PATH"

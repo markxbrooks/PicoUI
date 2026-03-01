@@ -2,9 +2,8 @@
 Create spinbox with label from spec
 """
 
-from PySide6.QtWidgets import QLabel, QSpinBox
-
 from picoui.specs.widgets import SpinBoxSpec
+from PySide6.QtWidgets import QLabel, QSpinBox
 
 
 def spinbox_with_label(

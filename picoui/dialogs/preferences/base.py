@@ -6,21 +6,25 @@ Sets settings for various biotoolkit features
 
 from __future__ import annotations
 
-from PySide6.QtCore import QSettings, QSize
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (QCheckBox, QDialog,
-                               QHBoxLayout, QLineEdit,
-                               QTabWidget, QVBoxLayout, QWidget, QComboBox, QLabel)
-
 from decologr import Decologr as log
+from picoui.dialogs.preferences.helper import create_checkbox_from_spec, create_settings_line_edit
 from picoui.icons import IconRegistry
 from picoui.settings import PicoUISettings
-from picoui.dialogs.preferences.helper import (
-    create_checkbox_from_spec,
-    create_settings_line_edit,
-)
 from picoui.specs.widgets import TabWidgetSpec, WindowSpec
 from picoui.tooltip.manager import TooltipManager
+from PySide6.QtCore import QSettings, QSize
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class BasePreferencesDialog(QDialog):
@@ -54,6 +58,7 @@ class BasePreferencesDialog(QDialog):
             self.resize(self.window_spec.width, self.window_spec.height)
             if self.window_spec.icon and self.window_spec.icon.name:
                 from picoui.icons import IconRegistry
+
                 icon = IconRegistry.get_icon(self.window_spec.icon.name)
                 if icon and not icon.isNull():
                     self.setWindowIcon(icon)
@@ -90,15 +95,11 @@ class BasePreferencesDialog(QDialog):
 
     def _create_special_buttons(self, specs):
         """Create special buttons"""
-        raise NotImplementedError(
-            "Not implemented - should be implemented in child classes"
-        )
+        raise NotImplementedError("Not implemented - should be implemented in child classes")
 
     def _build_specs(self):
         """Build line edit specs from settings file"""
-        raise NotImplementedError(
-            "Not implemented - should be implemented in child classes"
-        )
+        raise NotImplementedError("Not implemented - should be implemented in child classes")
 
     def get_settings_value(self, setting_name: str, default_value=""):
         """Get settings value from settings file"""
@@ -110,8 +111,8 @@ class BasePreferencesDialog(QDialog):
         return value
 
     def _create_line_edit_from_spec(
-            self,
-            spec: SettingsFieldSpec,
+        self,
+        spec: SettingsFieldSpec,
     ) -> tuple[str, QLineEdit, QHBoxLayout]:
         """Create QLineEdit and layout from SettingsFieldSpec."""
 
@@ -133,9 +134,7 @@ class BasePreferencesDialog(QDialog):
 
     def _setup_connections(self):
         """setup connections"""
-        raise NotImplementedError(
-            "Not implemented - should be implemented in child classes"
-        )
+        raise NotImplementedError("Not implemented - should be implemented in child classes")
 
     def _create_tab_widget(self, main_layout):
         """create tab widget"""
@@ -169,22 +168,16 @@ class BasePreferencesDialog(QDialog):
         Updates the UI widgets but does not save to QSettings until user clicks OK.
         :return: None
         """
-        raise NotImplementedError(
-            "Not implemented - should be implemented in child classes"
-        )
+        raise NotImplementedError("Not implemented - should be implemented in child classes")
 
     def on_save_settings(self):
         """
         on_save_settings
         :return: None
         """
-        raise NotImplementedError(
-            "Not implemented - should be implemented in child classes"
-        )
+        raise NotImplementedError("Not implemented - should be implemented in child classes")
 
-    def save_checkbox_settings(
-            self, value_name: str, checkbox_widget: QCheckBox = None
-    ):
+    def save_checkbox_settings(self, value_name: str, checkbox_widget: QCheckBox = None):
         """save checkbox settings"""
         self.settings.setValue(value_name, checkbox_widget.isChecked())
 
@@ -245,9 +238,7 @@ class BasePreferencesDialog(QDialog):
         :param index: int
         :return:
         """
-        raise NotImplementedError(
-            "Not implemented - should be implemented in child classes"
-        )
+        raise NotImplementedError("Not implemented - should be implemented in child classes")
 
     def _create_log_level_combo(self, settings, item_list: dict[int, str]):
         """Create a log level QComboBox"""

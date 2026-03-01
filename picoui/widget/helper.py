@@ -9,24 +9,21 @@ UI initialization.
 
 from typing import Any, Callable
 
-from PySide6.QtWidgets import (QComboBox, QFileDialog, QLineEdit, QFormLayout,
-                               QWidget)
-
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtWidgets import (QCheckBox, QDialogButtonBox, QHBoxLayout,
-                               QLabel, QPushButton)
-
-from picoui.helpers import (
-    create_form_layout,
-    create_header_row,
-    create_row_with_widgets,
-)
+from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets
 from picoui.icons import IconRegistry
-from picoui.specs.widgets import (
-    ButtonSpec,
-    CheckBoxSpec,
-    ComboBoxSpec,
-    FileSelectionSpec,
+from picoui.specs.widgets import ButtonSpec, CheckBoxSpec, ComboBoxSpec, FileSelectionSpec
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDialogButtonBox,
+    QFileDialog,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QWidget,
 )
 
 
@@ -37,9 +34,7 @@ def create_button_box(
     button_box = QtWidgets.QDialogButtonBox(parent)
     button_box.setGeometry(QtCore.QRect(150, 250, 341, 32))
     button_box.setOrientation(QtCore.Qt.Horizontal)
-    button_box.setStandardButtons(
-        QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok
-    )
+    button_box.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
     button_box.setObjectName("button_box")
     # Add Reset to Defaults button
     reset_button = button_box.addButton(label, QtWidgets.QDialogButtonBox.ActionRole)
@@ -83,9 +78,7 @@ def create_checkbox_from_spec(spec: CheckBoxSpec) -> QCheckBox:
     return check_box
 
 
-def create_button(
-    label: str = None, tooltip: str = None, spec: ButtonSpec = None
-) -> QPushButton:
+def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = None) -> QPushButton:
     """Create a button from label/tooltip or from a ButtonSpec."""
     if spec is not None:
         label = spec.label or ""
@@ -130,15 +123,13 @@ def create_combo_box(
     return combo
 
 
-def create_combo_row(label: str = None, all_items_label: str = None, items: list = None, slot=None) -> tuple[
-    QHBoxLayout, QComboBox]:
+def create_combo_row(
+    label: str = None, all_items_label: str = None, items: list = None, slot=None
+) -> tuple[QHBoxLayout, QComboBox]:
     """create combo row"""
     label_widget = QLabel(label)
     combo = create_combo_box(all_items_label, items, slot)
-    widgets = [
-        label_widget,
-        combo
-    ]
+    widgets = [label_widget, combo]
     row = create_row_with_widgets(widgets)
     return row, combo
 

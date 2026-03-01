@@ -1,4 +1,3 @@
-
 class PicoUILogLevel:
     """Log levels for PicoUI."""
 

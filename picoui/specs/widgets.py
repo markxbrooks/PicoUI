@@ -4,14 +4,15 @@ Button Spec
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Any
+from typing import Any, Callable, List
 
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QFileDialog
+from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QVBoxLayout, QWidget
 
 
 @dataclass
 class UiNodeSpec:
     """Node with Children"""
+
     children: List["UiNodeSpec"] = field(default_factory=list)
 
 
@@ -25,6 +26,7 @@ class LeafSpec(UiNodeSpec):
 @dataclass
 class ButtonSpec:
     """Button Spec"""
+
     label: str = ""
     icon: str = ""
     tooltip: str = ""
@@ -39,6 +41,7 @@ class ButtonSpec:
 @dataclass
 class MessageBoxSpec(LeafSpec):
     """Message Box Spec"""
+
     title: str = ""
     message: str = ""
     type_attr: str = "Information"
@@ -49,6 +52,7 @@ class MessageBoxSpec(LeafSpec):
 @dataclass
 class CheckBoxSpec(LeafSpec):
     """Button Spec"""
+
     label: str = ""
     tooltip: str = ""
     checked_state: bool = False
@@ -59,6 +63,7 @@ class CheckBoxSpec(LeafSpec):
 @dataclass
 class ComboBoxSpec(LeafSpec):
     """Button Spec"""
+
     items: list = field(default_factory=list)
     tooltip: str = ""
     slot: Callable | None = None
@@ -66,6 +71,7 @@ class ComboBoxSpec(LeafSpec):
 
 class FileSelectionMode(Enum):
     """File selection mode"""
+
     SAVE = "save"
     LOAD = "load"
 
@@ -73,6 +79,7 @@ class FileSelectionMode(Enum):
 @dataclass
 class FileSelectionSpec(LeafSpec):
     """class File Selection Spec"""
+
     mode: str | Any = FileSelectionMode.SAVE
     file_type: str = "datasets"
     default_name: str = "datasets"
@@ -84,6 +91,7 @@ class FileSelectionSpec(LeafSpec):
 @dataclass
 class TabSpec(UiNodeSpec):
     """Tab Spec"""
+
     name: str = ""
     icon: str | None = None
     widget_attr: str | None = None
@@ -92,6 +100,7 @@ class TabSpec(UiNodeSpec):
 @dataclass
 class TabWidgetSpec(UiNodeSpec):
     """Tab Widget Spec"""
+
     name: str | None = None
     tabs: list[TabSpec] = field(default_factory=list)
 
@@ -105,6 +114,7 @@ class TabWidgetSpec(UiNodeSpec):
 @dataclass
 class IconSpec(LeafSpec):
     """IconSpec"""
+
     name: str = ""
     width: int = 40
     height: int = 40
@@ -113,6 +123,7 @@ class IconSpec(LeafSpec):
 @dataclass
 class WindowSpec(UiNodeSpec):
     """WindowSpec"""
+
     title: str = ""
     icon: IconSpec = field(default_factory=IconSpec)
     width: int = 750
@@ -122,6 +133,7 @@ class WindowSpec(UiNodeSpec):
 @dataclass
 class SpinBoxSpec:
     """SpinBox Spec"""
+
     label: str = ""
     min_val: int = 1
     max_val: int = 127

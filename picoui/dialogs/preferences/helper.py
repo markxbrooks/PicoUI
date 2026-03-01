@@ -15,11 +15,10 @@ Functions:
 
 from __future__ import annotations
 
-from PySide6.QtCore import QSettings
-from PySide6.QtWidgets import QCheckBox, QLineEdit, QPushButton
-
 from picoui.dialogs.preferences.spec import SettingsFieldSpec
 from picoui.widget.helper import create_button, create_checkbox
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QCheckBox, QLineEdit, QPushButton
 
 
 def create_checkbox_from_spec(spec: SettingsFieldSpec) -> QCheckBox:

@@ -8,11 +8,9 @@ import sys
 from pathlib import Path
 
 import qtawesome as qta
-from PySide6.QtGui import QPixmap
-
 from decologr import Decologr as log
-
 from picoui.dimensions import PicoUiDimensions
+from PySide6.QtGui import QPixmap
 
 
 def resource_path(path: Path) -> Path:

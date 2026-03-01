@@ -18,9 +18,6 @@ project_root = Path(__file__).resolve().parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from PySide6.QtCore import QMargins
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
-
 import unittest
 
 from picoui.helpers.layout import (
@@ -33,6 +30,8 @@ from picoui.helpers.layout import (
     create_row_with_widgets,
     create_vertical_layout,
 )
+from PySide6.QtCore import QMargins
+from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 
 
 def get_qapp():
@@ -81,9 +80,7 @@ class TestCreateLayoutWithWidgets(unittest.TestCase):
         self.assertEqual(layout.count(), 2)
 
     def test_empty_list_no_stretches(self):
-        layout = create_layout_with_items(
-            [], start_stretch=False, end_stretch=False
-        )
+        layout = create_layout_with_items([], start_stretch=False, end_stretch=False)
         self.assertEqual(layout.count(), 0)
 
     def test_one_widget_default_stretches(self):
