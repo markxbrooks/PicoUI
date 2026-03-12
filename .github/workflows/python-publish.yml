@@ -1,111 +1,29 @@
 name: Upload Python Package
 
 on:
-  # Publish to PyPI when a GitHub Release is published
   release:
     types: [published]
-  # (Optional) Publish to TestPyPI on pushes to main
-  push:
-    branches: ["main"]
 
 permissions:
   contents: read
-  id-token: write  # REQUIRED for PyPI Trusted Publishing (OIDC)
-
-env:
-  # Opt into Node 24 for JS actions to silence deprecation warnings
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  id-token: write  # REQUIRED for trusted publishing
 
 jobs:
-  # ---------- TestPyPI publish on main (optional) ----------
-  testpypi-publish:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install build tooling
-        run: |
-          python -m pip install --upgrade pip
-          pip install build twine tomli
-
-      - name: Clean build artifacts
-        run: rm -rf dist build *.egg-info
-
-      - name: Build distributions
-        run: python -m build
-
-      - name: Verify metadata (twine check)
-        run: twine check dist/*
-
-      # Optional: list dist for debugging
-      - name: Show built files
-        run: ls -l dist
-
-      # Upload to TestPyPI using the official action (requires TEST_PYPI_API_TOKEN repo secret)
-      - name: Publish to TestPyPI
-        if: success()
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: dist/
-          # If you want to use token auth instead of Trusted Publishing for TestPyPI:
-          # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-
-  # ---------- Build artifacts for PyPI release ----------
   release-build:
-    if: github.event_name == 'release' && github.event.action == 'published'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.x"
 
-      - name: Install build tooling
+      - name: Install build tools
         run: |
+          rm -rf dist build *.egg-info
           python -m pip install --upgrade pip
-          pip install build twine tomli
-
-      - name: Extract version from pyproject.toml
-        id: get_version
-        run: |
-          python - << 'PY'
-          import sys, re, pathlib
-          from tomli import loads
-          text = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
-          data = loads(text)
-          version = data.get("project", {}).get("version")
-          if not version:
-            print("::error::Could not find [project].version in pyproject.toml")
-            sys.exit(1)
-          print(f"version={version}")
-          print(f"::set-output name=version::{version}")
-          PY
-
-      - name: Ensure Git tag matches pyproject version
-        run: |
-          # Expect tags like v0.1.2 or 0.1.2
-          TAG="${GITHUB_REF#refs/tags/}"
-          TAG_STRIPPED="${TAG#v}"
-          echo "Tag: ${TAG}  |  Pyproject version: ${{ steps.get_version.outputs.version }}"
-          if [ "${TAG_STRIPPED}" != "${{ steps.get_version.outputs.version }}" ]; then
-            echo "::error::Git tag (${TAG}) does not match pyproject version (${{ steps.get_version.outputs.version }})"
-            exit 1
-          fi
+          pip install build
 
       - name: Clean build artifacts
         run: rm -rf dist build *.egg-info
@@ -113,31 +31,21 @@ jobs:
       - name: Build release distributions
         run: python -m build
 
-      - name: Verify metadata (twine check)
-        run: twine check dist/*
-
-      - name: Show built files
-        run: ls -l dist
-
       - name: Upload distributions as artifact
         uses: actions/upload-artifact@v4.3.0
         with:
           name: release-dists
           path: dist/
-          if-no-files-found: error
-          retention-days: 7
 
-  # ---------- Trusted publish to PyPI ----------
   pypi-publish:
-    if: github.event_name == 'release' && github.event.action == 'published'
     runs-on: ubuntu-latest
     needs: release-build
     permissions:
-      id-token: write  # REQUIRED for Trusted Publishing
-      contents: read
+      id-token: write  # REQUIRED
+
     environment:
       name: pypi
-      # Optional: shows link on deployment status page
+      # OPTIONAL:
       # url: https://pypi.org/project/picoui/${{ github.event.release.tag_name }}
 
     steps:
@@ -147,9 +55,7 @@ jobs:
           name: release-dists
           path: dist/
 
-      - name: Publish to PyPI (Trusted Publishing)
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
-          # No password needed with Trusted Publishing (OIDC)
-``
