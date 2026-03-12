@@ -1,0 +1,8 @@
+pip install twine build
+
+git tag v0.1.2
+git push origin v0.1.2
+
+rm -rf dist build *.egg-info
+python -m build
+twine upload dist/*

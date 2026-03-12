@@ -14,7 +14,7 @@ with open("picoui/__init__.py", "r", encoding="utf-8") as fh:
     if version_match:
         version = version_match.group(1)
     else:
-        version = "0.1.0"
+        version = "0.1.2"
 
 setup(
     name="picoui",
