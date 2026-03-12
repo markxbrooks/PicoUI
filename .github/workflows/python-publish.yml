@@ -21,6 +21,7 @@ jobs:
 
       - name: Install build tools
         run: |
+          rm -rf dist build *.egg-info
           python -m pip install --upgrade pip
           pip install build
 
