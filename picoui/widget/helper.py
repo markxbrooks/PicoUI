@@ -8,7 +8,7 @@ UI initialization.
 """
 
 from typing import Any, Callable
-
+import qtawesome as qta
 from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets
 from picoui.icons import IconRegistry
 from picoui.specs.widgets import ButtonSpec, CheckBoxSpec, ComboBoxSpec, FileSelectionSpec
@@ -88,6 +88,9 @@ def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = Non
         button.setToolTip(tooltip)
     if spec is not None and spec.slot is not None:
         button.clicked.connect(spec.slot)
+        if spec.icon is not None:
+            button.setIcon(qta.icon(spec.icon))
+        button.setEnabled(spec.enabled)
     return button
 
 

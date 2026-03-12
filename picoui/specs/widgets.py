@@ -36,6 +36,7 @@ class ButtonSpec:
     append_to: list | None = None
     name: str | None = None
     checkable: bool = True
+    enabled: bool = True
 
 
 @dataclass
