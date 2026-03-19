@@ -2,10 +2,12 @@
 Button Spec
 """
 
+import os
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, List
 
+from decologr import Decologr as log
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QVBoxLayout, QWidget
 
 
@@ -79,14 +81,33 @@ class FileSelectionMode(Enum):
 
 @dataclass
 class FileSelectionSpec(LeafSpec):
-    """class File Selection Spec"""
+    """Qt file dialog configuration.
 
-    mode: str | Any = FileSelectionMode.SAVE
+    Typical usage (open):
+
+        spec = FileSelectionSpec(
+            default_name=self.mtz_file_path or "",
+            mode=FileSelectionMode.LOAD,
+            filter=self.file_filters_data,
+            caption="Open density map (MTZ)",
+        )
+        path, _selected_filter = get_file_load_from_spec(spec, parent=window)
+
+    Pass a full path in ``default_name`` to re-open in that folder; set ``dir`` to
+    force a starting directory. For a bare basename, ``default_name`` + ``file_type``
+    builds the suggested path (e.g. ``name="out"``, ``file_type="pdb"`` → ``out.pdb``).
+    """
+
+    mode: FileSelectionMode | str = FileSelectionMode.SAVE
     file_type: str = "datasets"
     default_name: str = "datasets"
     caption: str = "Select datasets folder"
     filter: str = "All files (*.*)"
     dir: str = ""
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.mode = _normalize_file_selection_mode(self.mode)
 
 
 @dataclass
@@ -148,19 +169,63 @@ _DIALOG_FUNCS = {
 }
 
 
-def get_file_save_from_spec(spec: FileSelectionSpec, parent: QWidget) -> str:
-    """Get file name using spec."""
-
-    func = _DIALOG_FUNCS.get(spec.mode)
+def get_file_load_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[str, str]:
+    """Open-file dialog; returns (path, selected_filter) like Qt."""
+    mode = _normalize_file_selection_mode(spec.mode)
+    func = _DIALOG_FUNCS.get(mode)
     if func is None:
         log.message(f"mode {spec.mode} unsupported")
-        return ""
+        return "", ""
 
-    file_name, _ = func(
+    start = _dialog_start_path(spec)
+    return func(
         parent,
         caption=spec.caption,
-        dir=spec.dir,
+        dir=start,
         filter=spec.filter,
     )
 
-    return file_name
+
+def get_file_save_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[str, str]:
+    """Save-file dialog; returns (path, selected_filter) like Qt."""
+    mode = _normalize_file_selection_mode(spec.mode)
+    func = _DIALOG_FUNCS.get(mode)
+    if func is None:
+        log.message(f"mode {spec.mode} unsupported")
+        return "", ""
+
+    start = _dialog_start_path(spec)
+    return func(
+        parent,
+        caption=spec.caption,
+        dir=start,
+        filter=spec.filter,
+    )
+
+
+def _dialog_start_path(spec: FileSelectionSpec) -> str:
+    """Qt *dir* argument: explicit dir, else path-like default_name, else synthetic name."""
+    if spec.dir:
+        return spec.dir
+    dn = (spec.default_name or "").strip()
+    if not dn:
+        return ""
+    if os.path.isabs(dn) or os.sep in dn or (os.altsep and os.altsep in dn):
+        return dn
+    ext = (spec.file_type or "").strip().lstrip(".")
+    if ext and not dn.lower().endswith(f".{ext.lower()}"):
+        return f"{dn}.{ext}"
+    return dn
+
+
+def _normalize_file_selection_mode(mode: FileSelectionMode | str) -> FileSelectionMode | Any:
+    """_normalize_file_selection_mode"""
+    if isinstance(mode, FileSelectionMode):
+        return mode
+    if isinstance(mode, str):
+        lowered = mode.strip().lower()
+        if lowered == FileSelectionMode.SAVE.value:
+            return FileSelectionMode.SAVE
+        if lowered == FileSelectionMode.LOAD.value:
+            return FileSelectionMode.LOAD
+    return mode
