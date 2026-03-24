@@ -4,6 +4,11 @@ PicoUI Dimensions
 
 from PySide6.QtCore import QSize
 
+class Dimensions:
+    """Dimensions"""
+    WIDTH = 100
+    HEIGHT = 100
+
 
 class PicoUiDimensions:
     """PicoUiDimensions"""
