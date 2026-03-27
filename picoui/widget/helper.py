@@ -11,7 +11,13 @@ from typing import Any, Callable
 import qtawesome as qta
 from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets
 from picoui.icons import IconRegistry
-from picoui.specs.widgets import ButtonSpec, CheckBoxSpec, ComboBoxSpec, FileSelectionSpec
+from picoui.specs.widgets import (
+    ButtonSpec,
+    CheckBoxSpec,
+    ComboBoxSpec,
+    FileSelectionSpec,
+    wayland_safe_file_dialog_options,
+)
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -150,12 +156,17 @@ def get_file_path_from_spec(
     parent: QWidget, spec: FileSelectionSpec, start_dir: str = ""
 ) -> str | None:
     """Open a file dialog from a FileSelectionSpec; returns selected path or None."""
+    opts = wayland_safe_file_dialog_options()
+    kw: dict = {}
+    if opts is not None:
+        kw["options"] = opts
     if spec.mode == "save":
         path, _ = QFileDialog.getSaveFileName(
             parent,
             spec.caption,
             start_dir or spec.default_name,
             spec.filter,
+            **kw,
         )
     else:
         path, _ = QFileDialog.getOpenFileName(
@@ -163,6 +174,7 @@ def get_file_path_from_spec(
             spec.caption,
             start_dir,
             spec.filter,
+            **kw,
         )
     return path if path else None
 

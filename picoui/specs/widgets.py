@@ -8,7 +8,13 @@ from enum import Enum
 from typing import Any, Callable, List
 
 from decologr import Decologr as log
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 @dataclass
@@ -169,6 +175,29 @@ _DIALOG_FUNCS = {
 }
 
 
+def wayland_safe_file_dialog_options():
+    """
+    Prefer Qt's non-native file dialog on Wayland.
+
+    Native (e.g. portal/GTK) dialogs can trigger GLib GFileInfo icon warnings and
+    xdg-shell protocol errors with some compositors, including when opened from
+    a menu popup.
+    """
+    try:
+        if os.environ.get("WAYLAND_DISPLAY"):
+            return QFileDialog.Option.DontUseNativeDialog
+        if os.environ.get("XDG_SESSION_TYPE", "").lower() == "wayland":
+            return QFileDialog.Option.DontUseNativeDialog
+        app = QApplication.instance()
+        if app is not None:
+            name = (app.platformName() or "").lower()
+            if name.startswith("wayland"):
+                return QFileDialog.Option.DontUseNativeDialog
+    except Exception:
+        pass
+    return None
+
+
 def get_file_load_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[str, str]:
     """Open-file dialog; returns (path, selected_filter) like Qt."""
     mode = _normalize_file_selection_mode(spec.mode)
@@ -178,12 +207,15 @@ def get_file_load_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[s
         return "", ""
 
     start = _dialog_start_path(spec)
-    return func(
-        parent,
+    opts = wayland_safe_file_dialog_options()
+    kwargs = dict(
         caption=spec.caption,
         dir=start,
         filter=spec.filter,
     )
+    if opts is not None:
+        kwargs["options"] = opts
+    return func(parent, **kwargs)
 
 
 def get_file_save_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[str, str]:
@@ -195,12 +227,15 @@ def get_file_save_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[s
         return "", ""
 
     start = _dialog_start_path(spec)
-    return func(
-        parent,
+    opts = wayland_safe_file_dialog_options()
+    kwargs = dict(
         caption=spec.caption,
         dir=start,
         filter=spec.filter,
     )
+    if opts is not None:
+        kwargs["options"] = opts
+    return func(parent, **kwargs)
 
 
 def _dialog_start_path(spec: FileSelectionSpec) -> str:
