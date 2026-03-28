@@ -85,6 +85,35 @@ class IconRegistry:
     PAUSE = "mdi.pause"
     SERVER_PROCESS = "msc.server-process"
 
+    # ElMo main window / viewer (tabs, menus, toolbar)
+    DELETE_SWEEP = "mdi.delete-sweep"
+    DOWNLOAD = "ph.download"
+    SEARCH = "fa5s.search"
+    ALIGN_LEFT = "fa5s.align-left"
+    MDI_REFRESH = "mdi.refresh"
+    MDI_GRID = "mdi.grid"
+    MDI_MAGNIFY = "mdi.magnify"
+    CAMERA = "mdi.camera"
+    FULLSCREEN = "mdi.fullscreen"
+    TOOLS = "mdi.tools"
+    CHART_SCATTER_PLOT = "mdi.chart-scatter-plot"
+    INTER_CHAIN_CONTACTS = "mdi.call-split"
+    MAP_TAB = "mdi.map"
+    VIEW_DASHBOARD = "mdi.view-dashboard-variant"
+    DIALS_TAB = "mdi.tune"
+    MIDI_TAB = "mdi.midi"
+    SYMMETRY_MATES_TAB = "mdi.crystal-ball"
+    TERMINAL_TAB = "fa5s.terminal"
+    PREFERENCES = "mdi.cog"
+    TABLE_GRID = "fa5s.table"
+    MSC_FILE_TEXT = "msc.file-text"
+    CLIP_SLICE = "ri.slice-fill"
+    FOG_LINE = "ri.foggy-line"
+    PICK_ATOM = "fa5s.mouse-pointer"
+    SECOND_LIGHT = "mdi6.ceiling-light-multiple"
+    BACKGROUND_TOGGLE = "fa5s.yin-yang"
+    AUTO_ROTATE = "mdi.axis-z-rotate-clockwise"
+
     @staticmethod
     def get_pixmap(icon_name: str) -> QPixmap:
         filename = IconRegistry.pixmaps.get(icon_name)
