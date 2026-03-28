@@ -92,11 +92,12 @@ def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = Non
     button = QPushButton(label or "")
     if tooltip:
         button.setToolTip(tooltip)
-    if spec is not None and spec.slot is not None:
-        button.clicked.connect(spec.slot)
-        if spec.icon is not None:
+    if spec is not None:
+        if spec.icon:
             button.setIcon(qta.icon(spec.icon))
         button.setEnabled(spec.enabled)
+        if spec.slot is not None:
+            button.clicked.connect(spec.slot)
     return button
 
 
