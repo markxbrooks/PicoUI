@@ -8,6 +8,11 @@ class Dimensions:
     """Dimensions"""
     WIDTH = 100
     HEIGHT = 100
+    MIN_HEIGHT = 100
+    MAX_HEIGHT = 100
+    MIN_WIDTH = 100
+    MAX_WIDTH = 100
+    FONT_PT = 10
 
 
 class PicoUiDimensions:
