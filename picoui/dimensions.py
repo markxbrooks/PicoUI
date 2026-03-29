@@ -13,6 +13,9 @@ class Dimensions:
     MIN_WIDTH = 100
     MAX_WIDTH = 100
     FONT_PT = 10
+    RADIUS = 10
+    POINT_SIZE = 5
+    LINE_WIDTH = 1.2
 
 
 class PicoUiDimensions:
