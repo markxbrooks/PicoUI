@@ -56,10 +56,12 @@ def create_layout_with_items(
     if start_stretch:
         container_layout.addStretch()
     for item in items:
-        if isinstance(item, LayoutItem):
-            container_layout.addWidget(item)
-        else:
+        # Must not use Union[QWidget, QLayout] with isinstance: QWidget wins for buttons,
+        # so layouts would never be chosen correctly and widgets would get addLayout().
+        if isinstance(item, QLayout):
             container_layout.addLayout(item)
+        else:
+            container_layout.addWidget(item)
     if end_stretch:
         container_layout.addStretch()
     if spacing is not None:
