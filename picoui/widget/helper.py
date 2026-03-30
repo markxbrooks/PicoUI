@@ -16,7 +16,7 @@ from picoui.specs.widgets import (
     CheckBoxSpec,
     ComboBoxSpec,
     FileSelectionSpec,
-    wayland_safe_file_dialog_options,
+    wayland_safe_file_dialog_options, TabSpec,
 )
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import (
@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QWidget,
+    QWidget, QTabWidget,
 )
 
 
@@ -196,3 +196,14 @@ def create_icon_label(icon_name, text):
     layout.addStretch()
 
     return widget
+
+
+def add_tab_from_spec(parent: QWidget, tab_widget: QTabWidget, spec: TabSpec):
+    """add tab from spec"""
+    widget = getattr(parent, spec.widget_attr)
+    if widget is not None:
+        tab_widget.addTab(
+            widget,
+            IconRegistry.get_icon(spec.icon),
+            spec.name,
+        )

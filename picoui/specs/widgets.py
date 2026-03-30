@@ -5,7 +5,9 @@ Button Spec
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
+
+from PySide6.QtCore import Qt
 
 from decologr import Decologr as log
 from PySide6.QtWidgets import (
@@ -264,3 +266,18 @@ def _normalize_file_selection_mode(mode: FileSelectionMode | str) -> FileSelecti
         if lowered == FileSelectionMode.LOAD.value:
             return FileSelectionMode.LOAD
     return mode
+
+
+@dataclass
+class ActionSpec:
+    """Declarative QAction fields for ``ElMoWindow.action_from_spec``."""
+
+    text: str = ""
+    icon: Optional[str] = None
+    shortcut: Any = None
+    status: str = ""
+    triggered: Optional[Callable] = None
+    toggled: Optional[Callable[[bool], None]] = None
+    checkable: bool = False
+    checked: Optional[bool] = None
+    shortcut_context: Optional[Qt.ShortcutContext] = None
