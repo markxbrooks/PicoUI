@@ -180,7 +180,7 @@ def get_file_path_from_spec(
 
 
 def create_icon_label(icon_name, text):
-    """Create a label widget with an icon and text"""
+    """Create a label widget with an icons and text"""
     widget = QWidget()
     layout = QHBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)

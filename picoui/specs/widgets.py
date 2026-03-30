@@ -179,7 +179,7 @@ def wayland_safe_file_dialog_options():
     """
     Prefer Qt's non-native file dialog on Wayland.
 
-    Native (e.g. portal/GTK) dialogs can trigger GLib GFileInfo icon warnings and
+    Native (e.g. portal/GTK) dialogs can trigger GLib GFileInfo icons warnings and
     xdg-shell protocol errors with some compositors, including when opened from
     a menu popup.
     """
