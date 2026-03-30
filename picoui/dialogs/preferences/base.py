@@ -125,7 +125,7 @@ class BasePreferencesDialog(QDialog):
         )
 
         layout = create_row(
-            icon_name=spec.icon,
+            icon_name=spec.icons,
             label_text=spec.label,
             widget=line_edit,
         )

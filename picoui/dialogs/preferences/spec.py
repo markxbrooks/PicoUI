@@ -1,6 +1,6 @@
 """
 Defines the SettingsFieldSpec dataclass, which outlines the specifications
-for a settings field. This includes attributes such as label, key, icon,
+for a settings field. This includes attributes such as label, key, icons,
 widget type, and other related properties.
 
 The SettingsFieldSpec class is designed to provide a structured definition

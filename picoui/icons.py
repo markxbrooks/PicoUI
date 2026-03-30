@@ -1,7 +1,7 @@
 """
 Icon registry.
 
-Provides centralized icon definitions and retrieval with fallback support.
+Provides centralized icons definitions and retrieval with fallback support.
 """
 
 import sys
@@ -24,11 +24,14 @@ class IconRegistryPixmaps:
 
 
 class IconRegistry:
-    """Centralized icon definitions and retrieval"""
+    """Centralized icons definitions and retrieval"""
 
     _base_dir = Path(__file__).resolve().parent / "images"
 
     pixmaps = IconRegistryPixmaps
+
+    dashboard = "mdi.view-dashboard-variant"
+    map = "mdi.map"
 
     # Action icons
     RUN = "msc.run"
@@ -123,17 +126,17 @@ class IconRegistry:
         path = resource_path(IconRegistry._base_dir / filename)
 
         if not path.exists():
-            raise FileNotFoundError(f"Missing icon: {path}")
+            raise FileNotFoundError(f"Missing icons: {path}")
 
         return QPixmap(str(path))
 
     @staticmethod
     def get_icon(icon_name: str, fallback: str = None):
         """
-        Get icon with fallback support.
+        Get icons with fallback support.
 
         :param icon_name: Icon identifier (e.g., "msc.run")
-        :param fallback: Fallback icon if primary fails
+        :param fallback: Fallback icons if primary fails
         :return: QIcon or None if both fail
         """
         try:
@@ -143,32 +146,32 @@ class IconRegistry:
             return icon
 
         except Exception as ex:
-            log.debug(f"Failed to load icon {icon_name}: {ex}")
+            log.debug(f"Failed to load icons {icon_name}: {ex}")
             if fallback:
                 try:
                     icon = qta.icon(fallback)
                     if not icon.isNull():
-                        log.info(f"Using fallback icon {fallback} for {icon_name}")
+                        log.info(f"Using fallback icons {fallback} for {icon_name}")
                         return icon
 
                 except Exception as fallback_ex:
-                    log.exception(f"Failed to load fallback icon {fallback_ex}")
-            log.warning(f"Could not load icon {icon_name}")
+                    log.exception(f"Failed to load fallback icons {fallback_ex}")
+            log.warning(f"Could not load icons {icon_name}")
             return None
 
     @staticmethod
     def get_icon_safe(icon_name: str, fallback: str = None):
         """
-        Get icon with fallback support, returns empty QIcon if all fail.
+        Get icons with fallback support, returns empty QIcon if all fail.
 
         This version always returns a QIcon object (may be empty).
 
         :param icon_name: Icon identifier
-        :param fallback: Fallback icon if primary fails
+        :param fallback: Fallback icons if primary fails
         :return: QIcon (may be empty if all fail)
         """
         icon = IconRegistry.get_icon(icon_name, fallback)
         if icon is None:
-            # Return empty icon
+            # Return empty icons
             return qta.icon("")
         return icon
