@@ -1,21 +1,23 @@
 """
 PicoUI Dimensions
 """
+from dataclasses import dataclass
 
 from PySide6.QtCore import QSize
 
+
+@dataclass
 class Dimensions:
     """Dimensions"""
-    WIDTH = 100
-    HEIGHT = 100
-    MIN_HEIGHT = 100
-    MAX_HEIGHT = 100
-    MIN_WIDTH = 100
-    MAX_WIDTH = 100
-    FONT_PT = 10
-    RADIUS = 10
-    POINT_SIZE = 5
-    LINE_WIDTH = 1.2
+    width = 100
+    height = 100
+    min_height = 100
+    max_height = 100
+    min_width = 100
+    max_width = 100
+    radius = 10
+    point_size = 5
+    line_width = 1.2
 
 
 class PicoUiDimensions:
