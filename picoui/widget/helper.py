@@ -9,7 +9,8 @@ UI initialization.
 
 from typing import Any, Callable
 import qtawesome as qta
-from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets
+from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets, create_layout_with_items, \
+    group_with_layout
 from picoui.icons import IconRegistry
 from picoui.specs.widgets import (
     ButtonSpec,
@@ -29,7 +30,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QWidget, QTabWidget,
+    QWidget, QTabWidget, QGroupBox,
 )
 
 
@@ -104,6 +105,15 @@ def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = Non
 def create_button_from_spec(spec: ButtonSpec) -> QPushButton:
     """Create a button from a ButtonSpec."""
     return create_button(spec=spec)
+
+
+def create_group_with_items(
+    label: str, items: list, vertical: bool = False
+) -> QGroupBox:
+    """create group with widgets"""
+    layout = create_layout_with_items(items=items, vertical=vertical)
+    group, _ = group_with_layout(label=label, layout=layout)
+    return group
 
 
 def create_combo_box(

@@ -18,6 +18,7 @@ class Dimensions:
     radius = 10
     point_size = 5
     line_width = 1.2
+    size = (width, height)
 
 
 class PicoUiDimensions:
