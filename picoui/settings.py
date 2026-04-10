@@ -17,6 +17,10 @@ from PySide6.QtCore import QSettings
 
 from jdxi_editor.project import __program__, __project__
 
+def log_settings():
+    settings = QSettings(PicoUIConstants.PROJECT, PicoUIConstants.PROGRAM)
+
+    log.debug(f'log_level {settings.value("log_level", logging.DEBUG, type=int)}')
 
 class PicoUIConstants:
     """Centralised keys/constants for preferences keys and environment vars."""

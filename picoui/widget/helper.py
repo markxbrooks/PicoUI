@@ -17,7 +17,7 @@ from picoui.specs.widgets import (
     CheckBoxSpec,
     ComboBoxSpec,
     FileSelectionSpec,
-    wayland_safe_file_dialog_options, TabSpec,
+    wayland_safe_file_dialog_options, TabSpec, DoubleSpinBoxSpec,
 )
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import (
@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QWidget, QTabWidget, QGroupBox,
+    QWidget, QTabWidget, QGroupBox, QDoubleSpinBox,
 )
 
 
@@ -89,7 +89,7 @@ def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = Non
     """Create a button from label/tooltip or from a ButtonSpec."""
     if spec is not None:
         label = spec.label or ""
-        tooltip = spec.tooltip or None
+        tooltip = spec.tooltip or ""
     button = QPushButton(label or "")
     if tooltip:
         button.setToolTip(tooltip)
@@ -99,6 +99,8 @@ def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = Non
         button.setEnabled(spec.enabled)
         if spec.slot is not None:
             button.clicked.connect(spec.slot)
+        if spec.default is not None:
+            button.setDefault(spec.default)
     return button
 
 
@@ -114,6 +116,17 @@ def create_group_with_items(
     layout = create_layout_with_items(items=items, vertical=vertical)
     group, _ = group_with_layout(label=label, layout=layout)
     return group
+
+def create_double_spinbox_from_spec(ribbon_width_scale_spin_spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
+    ribbon_width_scale_spin = QDoubleSpinBox()
+    ribbon_width_scale_spin.setRange(
+        ribbon_width_scale_spin_spec.min_val, ribbon_width_scale_spin_spec.max_val
+    )
+    ribbon_width_scale_spin.setDecimals(ribbon_width_scale_spin_spec.decimals)
+    ribbon_width_scale_spin.setSingleStep(ribbon_width_scale_spin_spec.step)
+    ribbon_width_scale_spin.setValue(ribbon_width_scale_spin_spec.value)
+    ribbon_width_scale_spin.setToolTip(ribbon_width_scale_spin_spec.tooltip)
+    return ribbon_width_scale_spin
 
 
 def create_combo_box(

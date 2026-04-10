@@ -47,6 +47,7 @@ class ButtonSpec:
     name: str | None = None
     checkable: bool = True
     enabled: bool = True
+    default: bool = True
 
 
 @dataclass
@@ -168,6 +169,18 @@ class SpinBoxSpec:
     min_val: int = 1
     max_val: int = 127
     value: int = None
+    tooltip: str = ""
+
+@dataclass
+class DoubleSpinBoxSpec:
+    """SpinBox Spec"""
+
+    label: str = ""
+    min_val: float = 0.0
+    max_val: float = 100.0
+    value: float = None
+    decimals: int = 2
+    step: float = 0.1
     tooltip: str = ""
 
 
