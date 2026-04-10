@@ -8,6 +8,7 @@ from __future__ import annotations
 from decologr import Decologr as log
 from picoui.dialogs.preferences.helper import create_checkbox_from_spec, create_settings_line_edit
 from picoui.dialogs.preferences.spec import SettingsFieldSpec
+from picoui.helpers import create_layout_with_items
 from picoui.icons import IconRegistry
 from elmo.ui.settings import PicoUISettings, log_settings
 from picoui.specs.widgets import TabWidgetSpec, WindowSpec
@@ -23,10 +24,10 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QTabWidget,
     QVBoxLayout,
-    QWidget,
+    QWidget, QLayout,
 )
 
-from picoui.widget.helper import create_row
+from picoui.widget.helper import create_row, create_group_with_items
 from picoui.widget.type import WidgetType
 
 
@@ -39,13 +40,15 @@ class BasePreferencesDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         self.expected_values: dict[str, str] = {}
+        self.button_box: QWidget | None = None
+        self.reset_button: QWidget | None = None
+        self.font: QFont | None  = None
+        self.icon_size: QSize | None  = None
+        self.settings: QSettings | None = None
         self._widgets: dict[str, QWidget] = {}
-        self._layouts: dict[str, QHBoxLayout] = {}
-        self.button_box: QWidget = None
-        self.reset_button: QWidget = None
-        self.font: QFont = None
-        self.icon_size: QSize = None
-        self.settings: QSettings = None
+        self._layouts: dict[str, QLayout] = {}
+        self._groups: dict[str, QWidget] = {}
+        self._main_layout = QVBoxLayout(self)
         log_settings()
 
     def ui_setup(self, parent: QWidget = None):
@@ -54,6 +57,8 @@ class BasePreferencesDialog(QDialog):
         :param parent: QWidget
         :return: None
         """
+        if self.settings is None:
+            raise RuntimeError("QSettings must be initialized before ui_setup()")
         self.icon_size = QSize(40, 40)
         self.font = self.settings.value("font")
         if self.window_spec is not None:
@@ -71,9 +76,9 @@ class BasePreferencesDialog(QDialog):
         main_layout = QVBoxLayout(self)
         self._create_log_level_combo(self.settings, self.log_levels)
 
-        specs = self._build_specs()
+        """specs = self._build_specs()
 
-        self._build_widgets_from_specs(specs)
+        self._build_widgets_from_specs(specs)"""
 
         self._setup_connections()
 
@@ -96,12 +101,66 @@ class BasePreferencesDialog(QDialog):
             elif spec.widget_type == WidgetType.PUSHBUTTON:
                 self._create_special_buttons(specs)
 
+    def build_specs(self) -> dict:
+        return {}
+
+    def build_widgets(self, specs: dict):
+        """Default spec-driven widget creation"""
+        for key, spec in specs.items():
+            self._widgets[key] = self._create_widget_from_spec(spec)
+
+    def build_layouts(self):
+        """Override for manual layout composition"""
+        pass
+
+    def build_groups(self):
+        """Optional grouping layer"""
+        pass
+
+    def build_tabs(self):
+        """Optional tab layer"""
+        pass
+
+    # ---------- CORE IMPLEMENTATION ----------
+
+    def _configure_window(self):
+        self.setWindowTitle("Preferences")
+        self.resize(700, 500)
+
+    def _finalize_layout(self):
+        # Default: stack groups or layouts
+        for group in self._groups.values():
+            self._main_layout.addWidget(group)
+
+    # ---------- WIDGET FACTORY ----------
+
+    def _create_widget_from_spec(self, spec):
+        if isinstance(spec, ComboBoxSpec):
+            return create_combo_box(spec)
+        elif isinstance(spec, ButtonSpec):
+            return create_button_from_spec(spec)
+        elif isinstance(spec, DoubleSpinBoxSpec):
+            return create_double_spinbox_from_spec(spec)
+        else:
+            raise TypeError(f"Unsupported spec type: {type(spec)}")
+                
+    def add_row(self, key: str, items: list[QWidget], vertical=False):
+        layout = create_layout_with_items(
+            items=items,
+            vertical=vertical,
+            start_stretch=False,
+            end_stretch=True,
+        )
+        self._layouts[key] = layout
+        return layout
+
+    def add_group(self, key: str, label: str, items: list):
+        group = create_group_with_items(label=label, items=items)
+        self._groups[key] = group
+        return group
+
     def _create_special_buttons(self, specs):
         """Create special buttons"""
-        raise NotImplementedError("Not implemented - should be implemented in child classes")
-
-    def _build_specs(self):
-        """Build line edit specs from settings file"""
         raise NotImplementedError("Not implemented - should be implemented in child classes")
 
     def get_settings_value(self, setting_name: str, default_value=""):
