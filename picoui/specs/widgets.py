@@ -79,6 +79,7 @@ class ComboBoxSpec(LeafSpec):
     items: list = field(default_factory=list)
     tooltip: str = ""
     slot: Callable | None = None
+    current_index: int | None = None
 
 
 class FileSelectionMode(Enum):

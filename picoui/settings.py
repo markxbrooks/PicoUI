@@ -5,6 +5,8 @@ used in the application.
 
 It includes a set of classes that contain standardised constants and values
 to ensure consistent handling of these elements across the program.
+
+COPY This file to your project and edit it to your needs e.g. jdxi_editor below
 """
 
 from __future__ import annotations

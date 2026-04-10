@@ -145,6 +145,8 @@ def create_combo_box(
             combo.setToolTip(spec.tooltip)
         if slot is not None:
             combo.currentTextChanged.connect(slot)
+        if spec.current_index is not None:
+            combo.setCurrentIndex(spec.current_index)
         return combo
     combo = QComboBox()
     if all_items_label is not None:

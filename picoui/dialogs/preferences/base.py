@@ -7,8 +7,9 @@ Sets settings for various biotoolkit features
 from __future__ import annotations
 from decologr import Decologr as log
 from picoui.dialogs.preferences.helper import create_checkbox_from_spec, create_settings_line_edit
+from picoui.dialogs.preferences.spec import SettingsFieldSpec
 from picoui.icons import IconRegistry
-from picoui.settings import PicoUISettings, log_settings
+from elmo.ui.settings import PicoUISettings, log_settings
 from picoui.specs.widgets import TabWidgetSpec, WindowSpec
 from picoui.tooltip.manager import TooltipManager
 from PySide6.QtCore import QSettings, QSize
@@ -24,6 +25,10 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from picoui.widget.helper import create_row
+from picoui.widget.type import WidgetType
+
 
 class BasePreferencesDialog(QDialog):
     """BasePreferencesDialog"""
