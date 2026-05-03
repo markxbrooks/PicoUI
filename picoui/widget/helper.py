@@ -7,7 +7,7 @@ Qt widgets, allowing for consistent layout structures and streamlined
 UI initialization.
 """
 
-from typing import Any, Callable
+from typing import Any, Callable, Protocol
 import qtawesome as qta
 from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets, create_layout_with_items, \
     group_with_layout
@@ -17,7 +17,7 @@ from picoui.specs.widgets import (
     CheckBoxSpec,
     ComboBoxSpec,
     FileSelectionSpec,
-    wayland_safe_file_dialog_options, TabSpec, DoubleSpinBoxSpec,
+    wayland_safe_file_dialog_options, TabSpec, DoubleSpinBoxSpec, SpinBoxSpec,
 )
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import (
@@ -30,9 +30,18 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QWidget, QTabWidget, QGroupBox, QDoubleSpinBox,
+    QWidget, QTabWidget, QGroupBox, QDoubleSpinBox, QSpinBox,
 )
+from typing import TypeVar
 
+class BaseSpinBoxSpec(Protocol):
+    step: float | int
+    value: float | int
+    tooltip: str
+    suffix: str
+    slot: Callable | None
+
+TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 
 def create_button_box(
     label: str = "OK", parent: QWidget = None
@@ -117,16 +126,34 @@ def create_group_with_items(
     group, _ = group_with_layout(label=label, layout=layout)
     return group
 
-def create_double_spinbox_from_spec(ribbon_width_scale_spin_spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
-    ribbon_width_scale_spin = QDoubleSpinBox()
-    ribbon_width_scale_spin.setRange(
-        ribbon_width_scale_spin_spec.min_val, ribbon_width_scale_spin_spec.max_val
+
+def create_double_spinbox_from_spec(spin_spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
+    """create double spin from spec"""
+    double_spinbox = QDoubleSpinBox()
+    double_spinbox.setRange(
+        spin_spec.min_val, spin_spec.max_val
     )
-    ribbon_width_scale_spin.setDecimals(ribbon_width_scale_spin_spec.decimals)
-    ribbon_width_scale_spin.setSingleStep(ribbon_width_scale_spin_spec.step)
-    ribbon_width_scale_spin.setValue(ribbon_width_scale_spin_spec.value)
-    ribbon_width_scale_spin.setToolTip(ribbon_width_scale_spin_spec.tooltip)
-    return ribbon_width_scale_spin
+    double_spinbox.setDecimals(spin_spec.decimals)
+    return _configure_spinbox(double_spinbox, spin_spec)
+
+
+def _configure_spinbox(spinbox: TSpinBox, spin_spec: BaseSpinBoxSpec) -> TSpinBox:
+    spinbox.setSingleStep(spin_spec.step)
+    spinbox.setValue(spin_spec.value)
+    spinbox.setToolTip(spin_spec.tooltip)
+    spinbox.setSuffix(spin_spec.suffix)
+    if spin_spec.slot is not None:
+        spinbox.valueChanged.connect(spin_spec.slot)
+    return spinbox
+
+
+def create_spinbox_from_spec(spin_spec: SpinBoxSpec) -> QSpinBox:
+    """create double spin from spec"""
+    spinbox = QSpinBox()
+    spinbox.setRange(
+        spin_spec.min_val, spin_spec.max_val
+    )
+    return _configure_spinbox(spinbox, spin_spec)
 
 
 def create_combo_box(

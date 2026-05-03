@@ -167,10 +167,14 @@ class SpinBoxSpec:
     """SpinBox Spec"""
 
     label: str = ""
+    step: int = 10
     min_val: int = 1
     max_val: int = 127
     value: int = None
     tooltip: str = ""
+    suffix: str = ""
+    slot: Callable | None = None
+
 
 @dataclass
 class DoubleSpinBoxSpec:
@@ -183,7 +187,8 @@ class DoubleSpinBoxSpec:
     decimals: int = 2
     step: float = 0.1
     tooltip: str = ""
-
+    suffix: str = ""
+    slot: Callable | None = None
 
 _DIALOG_FUNCS = {
     FileSelectionMode.SAVE: QFileDialog.getSaveFileName,
