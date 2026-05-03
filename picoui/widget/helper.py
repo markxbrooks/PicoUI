@@ -7,9 +7,10 @@ Qt widgets, allowing for consistent layout structures and streamlined
 UI initialization.
 """
 
-from typing import Any, Callable, Protocol
+from typing import Callable, Protocol
 import qtawesome as qta
-from picoui.helpers import create_form_layout, create_header_row, create_row_with_widgets, create_layout_with_items, \
+
+from picoui.helpers import create_row_with_widgets, create_layout_with_items, \
     group_with_layout
 from picoui.icons import IconRegistry
 from picoui.specs.widgets import (
@@ -25,7 +26,6 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialogButtonBox,
     QFileDialog,
-    QFormLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -42,6 +42,8 @@ class BaseSpinBoxSpec(Protocol):
     slot: Callable | None
 
 TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
+
+TSpinBoxSpec = TypeVar("TSpinBoxSpec", SpinBoxSpec, DoubleSpinBoxSpec)
 
 def create_button_box(
     label: str = "OK", parent: QWidget = None
@@ -147,7 +149,7 @@ def _configure_spinbox(spinbox: TSpinBox, spin_spec: BaseSpinBoxSpec) -> TSpinBo
     return spinbox
 
 
-def create_spinbox_from_spec(spin_spec: SpinBoxSpec) -> QSpinBox:
+def create_spinbox_from_spec(spin_spec: TSpinBoxSpec) -> QSpinBox:
     """create double spin from spec"""
     spinbox = QSpinBox()
     spinbox.setRange(
