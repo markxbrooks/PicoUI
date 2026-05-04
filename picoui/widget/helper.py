@@ -47,6 +47,23 @@ TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 TSpinBoxSpec = TypeVar("TSpinBoxSpec", SpinBoxSpec, DoubleSpinBoxSpec)
 
 
+def double_spinbox_from_spec(spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
+    """create_double_spinbox_from_spec plus DoubleSpinBoxSpec.suffix (PicoUI omits it)."""
+    spin = create_double_spinbox_from_spec(spec)
+    if spec.suffix:
+        spin.setSuffix(spec.suffix)
+    return spin
+
+
+def create_layout_and_widget(margins: tuple, spacing: int) -> tuple[QHBoxLayout, QWidget]:
+    """create layout and widget"""
+    widget = QWidget()
+    layout = QHBoxLayout(widget)
+    layout.setContentsMargins(*margins)
+    layout.setSpacing(spacing)
+    return layout, widget
+
+
 def create_widget_with_items(items: list, margins: tuple, spacing: int) -> QWidget:
     """Create widget with items"""
     widget = QWidget()
