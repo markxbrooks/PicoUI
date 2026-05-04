@@ -9,6 +9,7 @@ UI initialization.
 
 from typing import Callable, Protocol
 import qtawesome as qta
+from PySide6.QtCore import Qt
 
 from picoui.helpers import create_row_with_widgets, create_layout_with_items, \
     group_with_layout
@@ -30,7 +31,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QWidget, QTabWidget, QGroupBox, QDoubleSpinBox, QSpinBox,
+    QWidget, QTabWidget, QGroupBox, QDoubleSpinBox, QSpinBox, QScrollArea,
 )
 from typing import TypeVar
 
@@ -44,6 +45,27 @@ class BaseSpinBoxSpec(Protocol):
 TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 
 TSpinBoxSpec = TypeVar("TSpinBoxSpec", SpinBoxSpec, DoubleSpinBoxSpec)
+
+
+def create_widget_with_items(items: list, margins: tuple, spacing: int) -> QWidget:
+    """Create widget with items"""
+    widget = QWidget()
+    layout = create_layout_with_items(parent=widget,
+                                      items=items,
+                                      end_stretch=True)
+    layout.setContentsMargins(*margins)
+    layout.setSpacing(spacing)
+    return widget
+
+
+def create_scroll_area() -> QScrollArea:
+    """Create scrollable area for the entire content"""
+    scroll_area = QScrollArea()
+    scroll_area.setWidgetResizable(True)
+    scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    return scroll_area
+
 
 def create_button_box(
     label: str = "OK", parent: QWidget = None
