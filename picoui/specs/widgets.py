@@ -74,9 +74,10 @@ class CheckBoxSpec(LeafSpec):
 
 @dataclass
 class ComboBoxSpec(LeafSpec):
-    """Button Spec"""
+    """Combo box from items; optional ``label`` for form layout metadata (``_form_label``)."""
 
     items: list = field(default_factory=list)
+    label: str = ""
     tooltip: str = ""
     slot: Callable | None = None
     current_index: int | None = None

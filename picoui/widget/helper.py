@@ -47,6 +47,12 @@ TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 TSpinBoxSpec = TypeVar("TSpinBoxSpec", SpinBoxSpec, DoubleSpinBoxSpec)
 
 
+def _attach_form_label(widget: QWidget, label: str) -> None:
+    """Optional UI metadata for QFormLayout helpers; not part of Qt public API."""
+    if label:
+        setattr(widget, "_form_label", label)
+
+
 def double_spinbox_from_spec(spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
     """create_double_spinbox_from_spec plus DoubleSpinBoxSpec.suffix (PicoUI omits it)."""
     spin = create_double_spinbox_from_spec(spec)
@@ -175,7 +181,9 @@ def create_double_spinbox_from_spec(spin_spec: DoubleSpinBoxSpec) -> QDoubleSpin
         spin_spec.min_val, spin_spec.max_val
     )
     double_spinbox.setDecimals(spin_spec.decimals)
-    return _configure_spinbox(double_spinbox, spin_spec)
+    result = _configure_spinbox(double_spinbox, spin_spec)
+    _attach_form_label(result, spin_spec.label)
+    return result
 
 
 def _configure_spinbox(spinbox: TSpinBox, spin_spec: BaseSpinBoxSpec) -> TSpinBox:
@@ -194,7 +202,9 @@ def create_spinbox_from_spec(spin_spec: TSpinBoxSpec) -> QSpinBox:
     spinbox.setRange(
         spin_spec.min_val, spin_spec.max_val
     )
-    return _configure_spinbox(spinbox, spin_spec)
+    result = _configure_spinbox(spinbox, spin_spec)
+    _attach_form_label(result, spin_spec.label)
+    return result
 
 
 def create_combo_box(
@@ -215,6 +225,7 @@ def create_combo_box(
             combo.currentTextChanged.connect(slot)
         if spec.current_index is not None:
             combo.setCurrentIndex(spec.current_index)
+        _attach_form_label(combo, spec.label)
         return combo
     combo = QComboBox()
     if all_items_label is not None:
