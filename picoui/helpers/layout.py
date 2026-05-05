@@ -32,12 +32,12 @@ LayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout]
 
 
 def create_layout_with_items(
-    items: List[LayoutItem],
+    items: List[LayoutItem] | None = None,
     vertical: bool = False,
     start_stretch: bool = True,
     end_stretch: bool = True,
     spacing: Optional[int] = None,
-    margins: Optional[QMargins] = None,
+    margins: Optional[Union[QMargins, tuple] ] = None,
     parent: Optional[QWidget] = None,
 ) -> Union[QHBoxLayout, QVBoxLayout]:
     """
@@ -55,19 +55,23 @@ def create_layout_with_items(
     container_layout = create_layout(vertical=vertical, parent=parent)
     if start_stretch:
         container_layout.addStretch()
-    for item in items:
-        # Must not use Union[QWidget, QLayout] with isinstance: QWidget wins for buttons,
-        # so layouts would never be chosen correctly and widgets would get addLayout().
-        if isinstance(item, QLayout):
-            container_layout.addLayout(item)
-        else:
-            container_layout.addWidget(item)
+    if items is not None:
+        for item in items:
+            # Must not use Union[QWidget, QLayout] with isinstance: QWidget wins for buttons,
+            # so layouts would never be chosen correctly and widgets would get addLayout().
+            if isinstance(item, QLayout):
+                container_layout.addLayout(item)
+            else:
+                container_layout.addWidget(item)
     if end_stretch:
         container_layout.addStretch()
     if spacing is not None:
         container_layout.setSpacing(spacing)
     if margins is not None:
-        container_layout.setContentsMargins(margins)
+        if isinstance(margins, QMargins):
+            container_layout.setContentsMargins(margins)
+        if isinstance(margins, tuple):
+            container_layout.setContentsMargins(*margins)
     return container_layout
 
 
