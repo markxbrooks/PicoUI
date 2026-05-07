@@ -188,7 +188,8 @@ def create_double_spinbox_from_spec(spin_spec: DoubleSpinBoxSpec) -> QDoubleSpin
 
 def _configure_spinbox(spinbox: TSpinBox, spin_spec: BaseSpinBoxSpec) -> TSpinBox:
     spinbox.setSingleStep(spin_spec.step)
-    spinbox.setValue(spin_spec.value)
+    if spin_spec.value is not None:
+        spinbox.setValue(spin_spec.value)
     spinbox.setToolTip(spin_spec.tooltip)
     spinbox.setSuffix(spin_spec.suffix)
     if spin_spec.slot is not None:
