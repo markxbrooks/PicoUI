@@ -136,6 +136,8 @@ def create_checkbox_from_spec(spec: CheckBoxSpec) -> QCheckBox:
     check_box = create_checkbox(label=spec.label, value=spec.checked_state)
     if spec.tooltip:
         check_box.setToolTip(spec.tooltip)
+    if spec.icon is not None:
+        check_box.setIcon(spec.icon)
     if spec.slot is not None:
         check_box.stateChanged.connect(spec.slot)
     return check_box

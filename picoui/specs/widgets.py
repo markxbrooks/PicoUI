@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any, Callable, List, Optional
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
 
 from decologr import Decologr as log
 from PySide6.QtWidgets import (
@@ -67,6 +68,7 @@ class CheckBoxSpec(LeafSpec):
 
     label: str = ""
     tooltip: str = ""
+    icon: QPixmap = None
     checked_state: bool = False
     slot: Callable = None
     style: str = None

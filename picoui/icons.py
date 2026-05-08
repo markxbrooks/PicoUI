@@ -131,7 +131,7 @@ class IconRegistry:
         return QPixmap(str(path))
 
     @staticmethod
-    def get_icon(icon_name: str, fallback: str = None):
+    def get_icon(icon_name: str, fallback: str = None) -> QPixmap:
         """
         Get icons with fallback support.
 
