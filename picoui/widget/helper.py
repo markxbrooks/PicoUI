@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialogButtonBox,
     QFileDialog,
+    QFormLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -51,6 +52,19 @@ def _attach_form_label(widget: QWidget, label: str) -> None:
     """Optional UI metadata for QFormLayout helpers; not part of Qt public API."""
     if label:
         setattr(widget, "_form_label", label)
+
+
+def add_form_row_for_spec_widget(layout: QFormLayout, widget: QWidget) -> None:
+    """Add ``widget`` to a :class:`~PySide6.QtWidgets.QFormLayout` using ``_form_label`` when set.
+
+    Spec-built controls should set ``_form_label`` via :func:`_attach_form_label`.
+    Checkboxes span the form (label is the checkbox text).
+    """
+    if isinstance(widget, QCheckBox):
+        layout.addRow(widget)
+        return
+    label = getattr(widget, "_form_label", None)
+    layout.addRow(label or "", widget)
 
 
 def double_spinbox_from_spec(spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
