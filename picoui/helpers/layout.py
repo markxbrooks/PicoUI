@@ -8,7 +8,7 @@ and related helpers with consistent typing and behavior.
 from typing import List, Optional, Union
 
 from PySide6.QtCore import QMargins
-from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QLayout, QVBoxLayout, QWidget, QGroupBox
 
 
 def create_layout(
@@ -29,6 +29,22 @@ def create_layout(
 
 
 LayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout]
+
+
+def create_group(layout: QHBoxLayout | QVBoxLayout,
+                 style_sheet: str = None,
+                 width: int = None,
+                 height: int = None) -> QGroupBox:
+    """create group with optional stylesheet, width and height"""
+    group = QGroupBox()
+    group.setLayout(layout)
+    if style_sheet is not None:
+        group.setStyleSheet(style_sheet)
+    if width is not None:
+        group.setMinimumWidth(width)
+    if height is not None:
+        group.setMaximumHeight(height)
+    return group
 
 
 def create_layout_with_items(
