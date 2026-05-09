@@ -1,0 +1,31 @@
+from typing import TypeVar, Generic, Callable, Iterable
+
+from picoui.parser.structured import T_Raw, T_IR, StructuredParser
+
+T_Domain = TypeVar("T_Domain")
+
+
+class ParsingService(Generic[T_Raw, T_IR, T_Domain]):
+    def __init__(
+        self,
+        parser: StructuredParser[T_Raw, T_IR],
+        factory: Callable[[T_IR], T_Domain],
+        deduplicator: Callable[[Iterable[T_Domain]], Iterable[T_Domain]] | None = None,
+    ):
+        self.parser = parser
+        self.factory = factory
+        self.deduplicator = deduplicator
+
+    def parse(self, raw: T_Raw) -> T_Domain:
+        ir = self.parser.parse(raw)
+        return self.factory(ir)
+
+    def parse_stream(self, raws: Iterable[T_Raw]) -> Iterable[T_Domain]:
+        for raw in raws:
+            yield self.parse(raw)
+
+    def parse_stream_dedup(self, raws: Iterable[T_Raw]) -> list[T_Domain]:
+        results = list(self.parse_stream(raws))
+        if self.deduplicator:
+            return list(self.deduplicator(results))
+        return results
