@@ -9,15 +9,8 @@ setting via group_from_definition.
 from typing import Any, List, Optional, Protocol, Union
 
 from picoui.helpers.layout import create_layout, create_layout_with_items
-from PySide6.QtWidgets import (
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLayout,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import (QFormLayout, QGridLayout, QGroupBox,
+                               QHBoxLayout, QLayout, QVBoxLayout, QWidget)
 
 
 class GroupDefinition(Protocol):

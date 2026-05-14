@@ -7,34 +7,24 @@ Qt widgets, allowing for consistent layout structures and streamlined
 UI initialization.
 """
 
-from typing import Callable, Protocol
-import qtawesome as qta
-from PySide6.QtCore import Qt
+from typing import Callable, Protocol, TypeVar
 
-from picoui.helpers import create_row_with_widgets, create_layout_with_items, \
-    group_with_layout
+import qtawesome as qta
+from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
+                            group_with_layout)
 from picoui.icons import IconRegistry
-from picoui.specs.widgets import (
-    ButtonSpec,
-    CheckBoxSpec,
-    ComboBoxSpec,
-    FileSelectionSpec,
-    wayland_safe_file_dialog_options, TabSpec, DoubleSpinBoxSpec, SpinBoxSpec,
-)
+from picoui.specs.widgets import (ButtonSpec, CheckBoxSpec, ComboBoxSpec,
+                                  DoubleSpinBoxSpec, FileSelectionSpec,
+                                  SpinBoxSpec, TabSpec,
+                                  wayland_safe_file_dialog_options)
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtWidgets import (
-    QCheckBox,
-    QComboBox,
-    QDialogButtonBox,
-    QFileDialog,
-    QFormLayout,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QWidget, QTabWidget, QGroupBox, QDoubleSpinBox, QSpinBox, QScrollArea,
-)
-from typing import TypeVar
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
+                               QDoubleSpinBox, QFileDialog, QFormLayout,
+                               QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+                               QPushButton, QScrollArea, QSpinBox, QTabWidget,
+                               QWidget)
+
 
 class BaseSpinBoxSpec(Protocol):
     step: float | int

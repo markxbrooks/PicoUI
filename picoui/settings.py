@@ -15,9 +15,9 @@ import logging
 from typing import ClassVar
 
 from decologr import Decologr as log
+from jdxi_editor.project import __program__, __project__
 from PySide6.QtCore import QSettings
 
-from jdxi_editor.project import __program__, __project__
 
 def log_settings():
     settings = QSettings(PicoUIConstants.PROJECT, PicoUIConstants.PROGRAM)

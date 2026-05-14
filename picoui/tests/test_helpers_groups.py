@@ -19,18 +19,12 @@ if str(project_root) not in sys.path:
 
 import unittest
 
-from picoui.helpers.groups import build_group, group_from_definition, group_with_layout
+from picoui.helpers.groups import (build_group, group_from_definition,
+                                   group_with_layout)
 from picoui.helpers.layout import create_layout, create_layout_with_items
-from PySide6.QtWidgets import (
-    QApplication,
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import (QApplication, QFormLayout, QGridLayout,
+                               QGroupBox, QHBoxLayout, QLabel, QVBoxLayout,
+                               QWidget)
 
 
 def get_qapp():

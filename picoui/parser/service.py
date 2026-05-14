@@ -1,6 +1,6 @@
-from typing import TypeVar, Generic, Callable, Iterable
+from typing import Callable, Generic, Iterable, TypeVar
 
-from picoui.parser.structured import T_Raw, T_IR, StructuredParser
+from picoui.parser.structured import T_IR, StructuredParser, T_Raw
 
 T_Domain = TypeVar("T_Domain")
 

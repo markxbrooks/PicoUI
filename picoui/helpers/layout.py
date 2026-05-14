@@ -8,7 +8,8 @@ and related helpers with consistent typing and behavior.
 from typing import List, Optional, Union
 
 from PySide6.QtCore import QMargins
-from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QLayout, QVBoxLayout, QWidget, QGroupBox
+from PySide6.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
+                               QLayout, QVBoxLayout, QWidget)
 
 
 def create_layout(

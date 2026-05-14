@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Iterable, Callable, Any
+from typing import Any, Callable, Generic, Iterable, TypeVar
 
 T_Raw = TypeVar("T_Raw")     # bytes | str
 T_IR = TypeVar("T_IR")       # ParsedSysExMessage | PDBLigandData

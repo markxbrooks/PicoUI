@@ -7,17 +7,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, List, Optional
 
+from decologr import Decologr as log
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
-
-from decologr import Decologr as log
-from PySide6.QtWidgets import (
-    QApplication,
-    QFileDialog,
-    QHBoxLayout,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout,
+                               QVBoxLayout, QWidget)
 
 
 @dataclass

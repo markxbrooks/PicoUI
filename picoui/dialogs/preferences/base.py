@@ -5,30 +5,24 @@ Sets settings for various biotoolkit features
 """
 
 from __future__ import annotations
+
 from decologr import Decologr as log
-from picoui.dialogs.preferences.helper import create_checkbox_from_spec, create_settings_line_edit
+from picoui.dialogs.preferences.helper import (create_checkbox_from_spec,
+                                               create_settings_line_edit)
 from picoui.dialogs.preferences.spec import SettingsFieldSpec
 from picoui.helpers import create_layout_with_items
 from picoui.icons import IconRegistry
-from elmo.ui.settings import PicoUISettings, log_settings
 from picoui.specs.widgets import TabWidgetSpec, WindowSpec
 from picoui.tooltip.manager import TooltipManager
+from picoui.widget.helper import create_group_with_items, create_row
+from picoui.widget.type import WidgetType
 from PySide6.QtCore import QSettings, QSize
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (
-    QCheckBox,
-    QComboBox,
-    QDialog,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QTabWidget,
-    QVBoxLayout,
-    QWidget, QLayout,
-)
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QHBoxLayout,
+                               QLabel, QLayout, QLineEdit, QTabWidget,
+                               QVBoxLayout, QWidget)
 
-from picoui.widget.helper import create_row, create_group_with_items
-from picoui.widget.type import WidgetType
+from elmo.ui.settings import PicoUISettings, log_settings
 
 
 class BasePreferencesDialog(QDialog):

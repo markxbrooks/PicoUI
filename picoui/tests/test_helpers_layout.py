@@ -20,16 +20,13 @@ if str(project_root) not in sys.path:
 
 import unittest
 
-from picoui.helpers.layout import (
-    create_form_layout,
-    create_header_row,
-    create_layout,
-    create_layout_with_inner_layouts,
-    create_layout_with_items,
-    create_left_aligned_row,
-    create_row_with_widgets,
-    create_vertical_layout,
-)
+from picoui.helpers.layout import (create_form_layout, create_header_row,
+                                   create_layout,
+                                   create_layout_with_inner_layouts,
+                                   create_layout_with_items,
+                                   create_left_aligned_row,
+                                   create_row_with_widgets,
+                                   create_vertical_layout)
 from PySide6.QtCore import QMargins
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 

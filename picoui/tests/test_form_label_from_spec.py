@@ -16,11 +16,9 @@ from PySide6.QtWidgets import QApplication
 _FORM_LABEL_FACTORIES_OK = False
 try:
     import qtawesome  # noqa: F401 — picoui.widget.helper dependency
-    from picoui.widget.helper import (
-        create_combo_box,
-        create_double_spinbox_from_spec,
-        create_spinbox_from_spec,
-    )
+    from picoui.widget.helper import (create_combo_box,
+                                      create_double_spinbox_from_spec,
+                                      create_spinbox_from_spec)
     _FORM_LABEL_FACTORIES_OK = True
 except ImportError:
     create_combo_box = None  # type: ignore[assignment, misc]
