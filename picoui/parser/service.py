@@ -1,3 +1,16 @@
+"""
+A service for parsing raw input, converting it into domain-specific objects, and optionally deduplicating results.
+
+This module provides the ParsingService class, which uses a parser and a factory
+to process raw data into intermediate representations and finally into domain-specific
+objects. It also includes an optional deduplication function.
+
+Classes:
+
+- ParsingService: Handles parsing of raw data, supports stream processing,
+  and allows for optional deduplication.
+"""
+
 from typing import Callable, Generic, Iterable, TypeVar
 
 from picoui.parser.structured import T_IR, StructuredParser, T_Raw

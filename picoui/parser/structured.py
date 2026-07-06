@@ -1,3 +1,11 @@
+"""A generic structured parser for processing raw data into an intermediate representation.
+
+This module provides a `StructuredParser` class for parsing raw data based on a given
+layout specification and transforming the parsed data into an intermediate representation
+using a builder function. It supports strict and non-strict parsing modes.
+
+"""
+
 from typing import Any, Callable, Generic, Iterable, TypeVar
 
 T_Raw = TypeVar("T_Raw")     # bytes | str

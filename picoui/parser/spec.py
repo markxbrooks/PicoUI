@@ -1,3 +1,11 @@
+"""
+This module defines dataclasses to specify configurations for argument parsers.
+
+The module provides data structures for defining key parser specifications,
+such as arguments' metadata, program descriptions, help texts, and other
+configuration details that enable the creation of customizable parsers.
+"""
+
 from dataclasses import dataclass
 
 
