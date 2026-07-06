@@ -4,12 +4,12 @@ Layout assembly utilities for PySide6 UI.
 Provides create_layout, create_layout_with_widgets, create_row_with_widgets,
 and related helpers with consistent typing and behavior.
 """
-
+from dataclasses import dataclass
 from typing import List, Optional, Union
 
 from PySide6.QtCore import QMargins
 from PySide6.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QLayout, QVBoxLayout, QWidget)
+                               QLayout, QVBoxLayout, QWidget, QProgressBar)
 
 
 def create_layout(
@@ -46,6 +46,43 @@ def create_group(layout: QHBoxLayout | QVBoxLayout,
     if height is not None:
         group.setMaximumHeight(height)
     return group
+
+
+@dataclass
+class ProgressBarSpec:
+    """Progress bar spec."""
+    range_min: int = 0
+    range_max: int = 100
+    start_value: int = 0
+    height: int = 22
+    text_visible: bool =True
+    format_text: str = "loading"
+
+def create_progress_bar_from_spec(spec: ProgressBarSpec):
+    """
+    Create a progress bar with range_min, range_max, and height,
+    """
+    create_progress_bar(range_min = spec.range_min,
+                        range_max = spec.range_max,
+                        start_value= spec.start_value,
+                        height=spec.height,
+                        text_visible=spec.text_visible,
+                        format_text = spec.format_text)
+
+def create_progress_bar(range_min: int = 0,
+                        range_max: int = 100,
+                        start_value: int =0,
+                        height: int=22,
+                        text_visible: bool =True,
+                        format_text: str = "loading") -> QProgressBar:
+    """create progress bar"""
+    progress_bar = QProgressBar()
+    progress_bar.setRange(range_min, range_max)
+    progress_bar.setValue(start_value)
+    progress_bar.setFixedHeight(height)
+    progress_bar.setTextVisible(text_visible)
+    progress_bar.setFormat(f"%p% — {format_text}…")
+    return progress_bar
 
 
 def create_layout_with_items(
