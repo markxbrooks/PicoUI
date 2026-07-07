@@ -290,18 +290,21 @@ def get_file_path_from_spec(
         )
     return path if path else None
 
+def create_icon(icon_name, text):
+    icon_label = QLabel()
+    icon_label.setPixmap(qta.icon(icon_name).pixmap(16, 16))
+    return icon_label
 
 def create_icon_label(icon_name, text):
     """Create a label widget with an icons and text"""
     widget = QWidget()
+
+    icon_label = create_icon(icon_name)
+    text_label = QLabel(text)
+
     layout = QHBoxLayout(widget)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setSpacing(4)
-
-    icon_label = QLabel()
-    icon_label.setPixmap(qta.icon(icon_name).pixmap(16, 16))
-    text_label = QLabel(text)
-
     layout.addWidget(icon_label)
     layout.addWidget(text_label)
     layout.addStretch()
