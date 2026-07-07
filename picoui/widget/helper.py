@@ -7,16 +7,17 @@ Qt widgets, allowing for consistent layout structures and streamlined
 UI initialization.
 """
 
-from typing import Callable, Protocol, TypeVar
+from typing import Callable, TypeVar, Optional
 
 import qtawesome as qta
+
 from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
                             group_with_layout)
 from picoui.icons import IconRegistry
 from picoui.specs.widgets import (ButtonSpec, CheckBoxSpec, ComboBoxSpec,
                                   DoubleSpinBoxSpec, FileSelectionSpec,
                                   SpinBoxSpec, TabSpec,
-                                  wayland_safe_file_dialog_options)
+                                  wayland_safe_file_dialog_options, LineEditSpec, BaseSpinBoxSpec)
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
@@ -24,14 +25,6 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
                                QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QSpinBox, QTabWidget,
                                QWidget)
-
-
-class BaseSpinBoxSpec(Protocol):
-    step: float | int
-    value: float | int
-    tooltip: str
-    suffix: str
-    slot: Callable | None
 
 TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 
@@ -127,7 +120,7 @@ def create_row(
     return layout
 
 
-def create_checkbox(label: str = None, value: bool = False) -> QCheckBox:
+def create_checkbox(label: Optional[str] = None, value: bool = False) -> QCheckBox:
     """Create a checkbox from label and value, or from a CheckBoxSpec."""
     check_box = QCheckBox(label or "")
     check_box.setLayoutDirection(QtCore.Qt.RightToLeft)
@@ -147,7 +140,7 @@ def create_checkbox_from_spec(spec: CheckBoxSpec) -> QCheckBox:
     return check_box
 
 
-def create_button(label: str = None, tooltip: str = None, spec: ButtonSpec = None) -> QPushButton:
+def create_button(label: Optional[str] = None, tooltip: Optional[str] = None, spec: Optional[ButtonSpec] = None) -> QPushButton:
     """Create a button from label/tooltip or from a ButtonSpec."""
     if spec is not None:
         label = spec.label or ""
@@ -193,6 +186,7 @@ def create_double_spinbox_from_spec(spin_spec: DoubleSpinBoxSpec) -> QDoubleSpin
 
 
 def _configure_spinbox(spinbox: TSpinBox, spin_spec: BaseSpinBoxSpec) -> TSpinBox:
+    """configure spinbox"""
     spinbox.setSingleStep(spin_spec.step)
     if spin_spec.value is not None:
         spinbox.setValue(spin_spec.value)
@@ -207,7 +201,7 @@ def create_spinbox_from_spec(spin_spec: TSpinBoxSpec) -> QSpinBox:
     """create double spin from spec"""
     spinbox = QSpinBox()
     spinbox.setRange(
-        spin_spec.min_val, spin_spec.max_val
+        int(spin_spec.min_val), int(spin_spec.max_val)
     )
     result = _configure_spinbox(spinbox, spin_spec)
     _attach_form_label(result, spin_spec.label)
@@ -245,7 +239,7 @@ def create_combo_box(
 
 
 def create_combo_row(
-    label: str = None, all_items_label: str = None, items: list = None, slot=None
+    label: Optional[str] = None, all_items_label: Optional[str] = None, items: Optional[list] = None, slot=None
 ) -> tuple[QHBoxLayout, QComboBox]:
     """create combo row"""
     label_widget = QLabel(label)
@@ -255,7 +249,13 @@ def create_combo_row(
     return row, combo
 
 
-def create_line_edit(style_sheet: str, placeholder: str, slot: Callable) -> QLineEdit:
+def create_line_edit_from_spec(spec: LineEditSpec) -> QLineEdit:
+    """create line edit"""
+    line_edit = create_line_edit(style_sheet=spec.style_sheet, placeholder=spec.placeholder, slot=spec.slot)
+    return line_edit
+
+
+def create_line_edit(style_sheet: str, placeholder: str, slot: Optional[Callable] = None) -> QLineEdit:
     """create line edit"""
     line_edit = QLineEdit()
     line_edit.setStyleSheet(style_sheet)
@@ -290,7 +290,8 @@ def get_file_path_from_spec(
         )
     return path if path else None
 
-def create_icon(icon_name, text):
+def create_icon(icon_name: str):
+    """create icon"""
     icon_label = QLabel()
     icon_label.setPixmap(qta.icon(icon_name).pixmap(16, 16))
     return icon_label
@@ -302,13 +303,7 @@ def create_icon_label(icon_name, text):
     icon_label = create_icon(icon_name)
     text_label = QLabel(text)
 
-    layout = QHBoxLayout(widget)
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.setSpacing(4)
-    layout.addWidget(icon_label)
-    layout.addWidget(text_label)
-    layout.addStretch()
-
+    layout = create_layout_with_items(items=[icon_label, text_label], vertical=False, parent=widget, spacing=4, margins=(0,0,0,0), end_stretch=True)
     return widget
 
 

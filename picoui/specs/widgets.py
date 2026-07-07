@@ -5,7 +5,7 @@ Button Spec
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Protocol
 
 from decologr import Decologr as log
 from PySide6.QtCore import Qt
@@ -297,3 +297,18 @@ class ActionSpec:
     checkable: bool = False
     checked: Optional[bool] = None
     shortcut_context: Optional[Qt.ShortcutContext] = None
+
+
+class LineEditSpec:
+    """Line Edit Spec"""
+    style_sheet: str = ""
+    placeholder: str = ""
+    slot: Optional[Callable] = None
+
+
+class BaseSpinBoxSpec(Protocol):
+    step: float | int
+    value: float | int
+    tooltip: str
+    suffix: str
+    slot: Callable | None
