@@ -19,6 +19,7 @@ class Dimensions:
     point_size = 5
     line_width = 1.2
     size = (width, height)
+    spacing: int = 10
 
 
 class PicoUiDimensions:
