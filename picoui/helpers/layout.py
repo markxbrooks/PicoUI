@@ -7,7 +7,7 @@ and related helpers with consistent typing and behavior.
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from PySide6.QtCore import QMargins
+from PySide6.QtCore import QMargins, Qt
 from PySide6.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
                                QLayout, QVBoxLayout, QWidget, QProgressBar)
 
@@ -34,7 +34,7 @@ def create_layout(
     if margins is not None:
         layout.setContentsMargins(*margins)
     if spacing is not None:
-        layout.setSpacing(spacing=spacing)
+        layout.setSpacing(spacing)
     return layout
 
 
@@ -170,10 +170,12 @@ def create_left_aligned_row(widgets: List[QWidget]) -> QHBoxLayout:
 def create_vertical_layout(
     spacing: Optional[int] = None,
     margins: Optional[QMargins] = None,
+    alignment: Qt.AlignmentFlag = Qt.AlignCenter
 ) -> QVBoxLayout:
     """
     Create a QVBoxLayout with optional spacing and margins.
 
+    :param alignment: Optional alignment.
     :param spacing: Optional spacing.
     :param margins: Optional margins (default 0,0,0,0).
     :return: QVBoxLayout.
@@ -181,6 +183,8 @@ def create_vertical_layout(
     layout = QVBoxLayout()
     if margins is not None:
         layout.setContentsMargins(margins)
+    if alignment is not None:
+        layout.setAlignment(alignment)
     if spacing is not None:
         layout.setSpacing(spacing)
     return layout
