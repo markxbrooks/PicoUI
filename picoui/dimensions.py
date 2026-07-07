@@ -21,6 +21,10 @@ class Dimensions:
     size = (width, height)
     spacing: int = 10
 
+    @classmethod
+    def to_tuple(cls):
+        return cls.width, cls.height
+
 
 class PicoUiDimensions:
     """PicoUiDimensions"""
