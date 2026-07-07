@@ -15,18 +15,27 @@ from PySide6.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
 def create_layout(
     vertical: bool = True,
     parent: Optional[QWidget] = None,
+    margins: tuple[int, int, int, int] = (0, 0, 0, 0),
+    spacing: int = 10,
 ) -> Union[QVBoxLayout, QHBoxLayout]:
     """
     Create a QVBoxLayout or QHBoxLayout, optionally attached to a parent.
 
+    :param margins: tuple of margins e.g. (0, 0, 0, 0)
     :param vertical: If True, create QVBoxLayout; else QHBoxLayout.
     :param parent: Optional widget to set as the layout's parent.
     :return: The created layout.
     """
     layout_cls = QVBoxLayout if vertical else QHBoxLayout
     if parent is not None:
-        return layout_cls(parent)
-    return layout_cls()
+        layout = layout_cls(parent)
+    else:
+        layout = layout_cls()
+    if margins is not None:
+        layout.setContentsMargins(*margins)
+    if spacing is not None:
+        layout.setSpacing(spacing=spacing)
+    return layout
 
 
 LayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout]
