@@ -38,7 +38,7 @@ def create_layout(
     return layout
 
 
-LayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout]
+LayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout, QProgressBar]
 
 
 def create_group(layout: QHBoxLayout | QVBoxLayout,
