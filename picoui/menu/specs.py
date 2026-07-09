@@ -17,3 +17,8 @@ class SubMenu:
 @dataclass
 class RecentFilesMenu:
     """``build_menu`` inserts ``ElMoWindow.recent_files_menu`` (filled by ``_refresh_recent_files_menu``)."""
+
+
+@dataclass
+class RecentDensityMapsMenu:
+    """``build_menu`` inserts ``ElMoWindow.recent_density_maps_menu`` (filled by ``_refresh_recent_density_maps_menu``)."""
