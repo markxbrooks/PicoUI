@@ -22,7 +22,7 @@ class TooltipManager:
 
     PREF_CLEAR_ON_SEARCH_CHECKBOX = "Clear the protein editor when performing a new search"
     PREF_LOG_LEVEL_COMBO = (
-        "Set the minimum logging level. " "DEBUG shows all messages, ERROR shows only errors."
+        "Set the minimum logging level. " "DEBUG shows all messages, ERROR shows only error."
     )
 
     # Search fields
