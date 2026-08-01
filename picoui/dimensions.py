@@ -19,10 +19,15 @@ class Dimensions:
     point_size: int = 5
     line_width: float = 1.2
     spacing: int = 10
+    margin: int = 5
 
     @property
     def size(self) -> tuple[int, int]:
         return self.width, self.height
+
+    @property
+    def margins(self):
+        return self.margin, self.margin, self.margin, self.margin
 
     def to_tuple(self) -> tuple[int, int]:
         return self.width, self.height
