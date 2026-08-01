@@ -46,8 +46,9 @@ Documentation = "https://github.com/markxbrooks/picoui#readme"
 Repository = "https://github.com/markxbrooks/picoui"
 Issues = "https://github.com/markxbrooks/picoui/issues"
 
-[tool.setuptools]
-packages = ["picoui"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["picoui*"]
 
 [tool.setuptools.package-data]
 picoui = ["py.typed"]  # For type checking support
