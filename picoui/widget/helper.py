@@ -107,16 +107,15 @@ def create_row(
     widget: QWidget,
 ) -> QHBoxLayout:
     """create row layout"""
-    layout = QHBoxLayout()
-
     icon = QLabel()
     icon.setPixmap(IconRegistry.get_icon(icon_name))
     label = QLabel(label_text)
-
-    layout.addWidget(icon)
-    layout.addWidget(label)
-    layout.addWidget(widget)
-
+    layout_widgets = [
+        icon,
+        label,
+        widget
+    ]
+    layout = create_layout_with_items(layout_widgets)
     return layout
 
 
