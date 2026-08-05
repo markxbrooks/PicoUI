@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import logging
 
+from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt5agg import \
     FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+
+from picoui.matplotlib import AxesConfig
 from picoui.matplotlib.config import AxesConfig
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
@@ -14,6 +17,17 @@ logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 logging.getLogger("matplotlib.backends").setLevel(logging.WARNING)
 logging.getLogger("matplotlib.backends.backend_qt5agg").setLevel(logging.WARNING)
+
+
+def configure_axes(config: AxesConfig, ax: Axes | None = None):
+    if config.x_config.limit is not None:
+        ax.set_xlim(-config.x_config.limit, config.x_config.limit)
+    if config.y_config.limit is not None:
+        ax.set_ylim(-config.y_config.limit, config.y_config.limit)
+    if config.visible:
+        ax.set_axis_on()
+    else:
+        ax.set_axis_off()
 
 
 class MatplotlibPlotWidget(QWidget):
@@ -66,14 +80,7 @@ class MatplotlibPlotWidget(QWidget):
             fontsize=title_font.size,
             fontweight=title_font.weight,
         )
-        if cfg.x_config.limit is not None:
-            self.ax.set_xlim(-cfg.x_config.limit, cfg.x_config.limit)
-        if cfg.y_config.limit is not None:
-            self.ax.set_ylim(-cfg.y_config.limit, cfg.y_config.limit)
-        if cfg.visible:
-            self.ax.set_axis_on()
-        else:
-            self.ax.set_axis_off()
+        configure_axes(cfg, self.ax)
 
     def redraw(self) -> None:
         self.canvas.draw()
