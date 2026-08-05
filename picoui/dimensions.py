@@ -4,6 +4,7 @@ PicoUI Dimensions
 from dataclasses import dataclass
 
 from PySide6.QtCore import QSize
+from PySide6.QtWidgets import QVBoxLayout
 
 
 @dataclass
@@ -39,3 +40,9 @@ class PicoUiDimensions:
     ICON_SIZE = QSize(40, 40)
     PROGRESS_BAR = {"width": 500, "height": 30}
     DIALOG = {"width": 500, "height": 120}
+
+
+def update_layout_with_dimensions(layout: QVBoxLayout | QVBoxLayout, window_dimensions: Dimensions):
+    """update layout with dimensions"""
+    layout.setContentsMargins(*window_dimensions.margins)
+    layout.setSpacing(window_dimensions.spacing)
