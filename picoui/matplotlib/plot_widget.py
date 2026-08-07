@@ -9,7 +9,6 @@ from matplotlib.backends.backend_qt5agg import \
     FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from picoui.matplotlib import AxesConfig
 from picoui.matplotlib.config import AxesConfig
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
@@ -20,10 +19,46 @@ logging.getLogger("matplotlib.backends.backend_qt5agg").setLevel(logging.WARNING
 
 
 def configure_axes(config: AxesConfig, ax: Axes | None = None):
+    """
+    Configures the visual appearance and boundaries of a matplotlib axes instance
+    based on the provided configuration settings.
+
+    Parameters
+    ----------
+    config : AxesConfig
+        The configuration object containing the settings for axes appearance
+        and limits.
+
+    ax : Axes, optional
+        A matplotlib axes instance on which the configuration will be applied.
+        If None, no operation will be performed.
+
+    Raises
+    ------
+    TypeError
+        If ``config`` is not an ``AxesConfig`` or ``ax`` is not a
+        ``matplotlib.axes.Axes`` instance.
+
+    Notes
+    -----
+    The method modifies the axes directly by setting the visibility as well as
+    the x-axis and y-axis limits according to the configuration. This function
+    requires proper configuration of the `AxesConfig` object beforehand for
+    successful application.
+    """
+    if not isinstance(config, AxesConfig):
+        raise TypeError(
+            f"config must be an AxesConfig, got {type(config).__name__}"
+        )
+
+    if ax is not None and not isinstance(ax, Axes):
+        raise TypeError(
+            f"ax must be a matplotlib.axes.Axes or None, got {type(ax).__name__}"
+        )
     if config.x_config.limit is not None:
-        ax.set_xlim(-config.x_config.limit, config.x_config.limit)
+        ax.set_xlim(left=-config.x_config.limit,right= config.x_config.limit)
     if config.y_config.limit is not None:
-        ax.set_ylim(-config.y_config.limit, config.y_config.limit)
+        ax.set_ylim(bottom=-config.y_config.limit, top=config.y_config.limit)
     if config.visible:
         ax.set_axis_on()
     else:
@@ -83,7 +118,9 @@ class MatplotlibPlotWidget(QWidget):
         configure_axes(cfg, self.ax)
 
     def redraw(self) -> None:
+        """Redraw the canvas."""
         self.canvas.draw()
 
     def export_figure(self, filename: str, *, dpi: int = 300) -> None:
+        """export the figure to a file."""
         self.figure.savefig(filename, dpi=dpi, bbox_inches="tight")
