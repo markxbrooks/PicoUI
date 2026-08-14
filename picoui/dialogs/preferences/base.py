@@ -6,15 +6,20 @@ Sets settings for various biotoolkit features
 
 from __future__ import annotations
 
+import logging
+
 from decologr import Decologr as log
 from picoui.dialogs.preferences.helper import (create_checkbox_from_spec,
                                                create_settings_line_edit)
 from picoui.dialogs.preferences.spec import SettingsFieldSpec
 from picoui.helpers import create_layout_with_items
 from picoui.icons import IconRegistry
-from picoui.specs.widgets import TabWidgetSpec, WindowSpec
+from picoui.specs.widgets import (ButtonSpec, ComboBoxSpec, DoubleSpinBoxSpec,
+                                  TabWidgetSpec, WindowSpec)
 from picoui.tooltip.manager import TooltipManager
-from picoui.widget.helper import create_group_with_items, create_row
+from picoui.widget.helper import (create_button_from_spec, create_combo_box,
+                                  create_double_spinbox_from_spec,
+                                  create_group_with_items, create_row)
 from picoui.widget.type import WidgetType
 from PySide6.QtCore import QSettings, QSize
 from PySide6.QtGui import QFont
@@ -22,7 +27,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QHBoxLayout,
                                QLabel, QLayout, QLineEdit, QTabWidget,
                                QVBoxLayout, QWidget)
 
-from elmo.ui.settings import PicoUISettings, log_settings
+LOG_LEVEL_KEY = "log_level"
 
 
 class BasePreferencesDialog(QDialog):
@@ -43,7 +48,6 @@ class BasePreferencesDialog(QDialog):
         self._layouts: dict[str, QLayout] = {}
         self._groups: dict[str, QWidget] = {}
         self._main_layout = QVBoxLayout(self)
-        log_settings()
 
     def ui_setup(self, parent: QWidget = None):
         """
@@ -55,19 +59,9 @@ class BasePreferencesDialog(QDialog):
             raise RuntimeError("QSettings must be initialized before ui_setup()")
         self.icon_size = QSize(40, 40)
         self.font = self.settings.value("font")
-        if self.window_spec is not None:
-            self.setWindowTitle(self.window_spec.title)
-            self.resize(self.window_spec.width, self.window_spec.height)
-            if self.window_spec.icon and self.window_spec.icon.name:
-                from picoui.icons import IconRegistry
+        self._apply_window_spec()
 
-                icon = IconRegistry.get_icon(self.window_spec.icon.name)
-                if icon and not icon.isNull():
-                    self.setWindowIcon(icon)
-        else:
-            self.resize(750, 400)
-
-        main_layout = QVBoxLayout(self)
+        main_layout = self._main_layout
         self._create_log_level_combo(self.settings, self.log_levels)
 
         """specs = self._build_specs()
@@ -77,8 +71,8 @@ class BasePreferencesDialog(QDialog):
         self._setup_connections()
 
         self._create_tab_widget(main_layout)
-        main_layout.addWidget(self.button_box)
-        self.setLayout(main_layout)
+        if self.button_box is not None:
+            main_layout.addWidget(self.button_box)
 
     def _build_widgets_from_specs(self, specs: dict[str, SettingsFieldSpec]):
         """Build widgets from specs dictionary."""
@@ -117,6 +111,18 @@ class BasePreferencesDialog(QDialog):
 
     # ---------- CORE IMPLEMENTATION ----------
 
+    def _apply_window_spec(self) -> None:
+        """Apply class-level WindowSpec title, size, and icon."""
+        if self.window_spec is None:
+            self.resize(750, 400)
+            return
+        self.setWindowTitle(self.window_spec.title)
+        self.resize(self.window_spec.width, self.window_spec.height)
+        if self.window_spec.icon and self.window_spec.icon.name:
+            icon = IconRegistry.get_icon_safe(self.window_spec.icon.name)
+            if icon and not icon.isNull():
+                self.setWindowIcon(icon)
+
     def _configure_window(self):
         self.setWindowTitle("Preferences")
         self.resize(700, 500)
@@ -130,7 +136,7 @@ class BasePreferencesDialog(QDialog):
 
     def _create_widget_from_spec(self, spec):
         if isinstance(spec, ComboBoxSpec):
-            return create_combo_box(spec)
+            return create_combo_box(spec=spec)
         elif isinstance(spec, ButtonSpec):
             return create_button_from_spec(spec)
         elif isinstance(spec, DoubleSpinBoxSpec):
@@ -211,7 +217,7 @@ class BasePreferencesDialog(QDialog):
                     f"Widget attribute '{tab.widget_attr}' not found on {type(self).__name__}"
                 )
 
-            icon = IconRegistry.get_icon(tab.icon) if tab.icon else None
+            icon = IconRegistry.get_icon_safe(tab.icon) if tab.icon else None
 
             if icon:
                 tabwidget.addTab(widget, icon, tab.name)
@@ -269,7 +275,10 @@ class BasePreferencesDialog(QDialog):
 
     def validate_settings_written(self, expected_values: dict[str, str | bool]) -> None:
         """Validate that all expected settings were written to disk"""
-        verify = QSettings(PicoUISettings.PROJECT, PicoUISettings.PROGRAM)
+        verify = QSettings(
+            self.settings.organizationName(),
+            self.settings.applicationName(),
+        )
 
         for key, expected in expected_values.items():
             saved = verify.value(key, type=type(expected))
@@ -301,14 +310,14 @@ class BasePreferencesDialog(QDialog):
         self.log_level_combo = QComboBox()
         self.log_level_combo.addItems(item_list.values())
         # --- Load the log level from QSettings
-        log_level = int(settings.value(PicoUISettings.LOG_LEVEL, logging.DEBUG))
+        log_level = int(settings.value(LOG_LEVEL_KEY, logging.DEBUG))
         index = list(item_list.keys()).index(log_level)
         if index >= 0:
             self.log_level_combo.setCurrentIndex(index)
         # --- Connect the combo box to a function that updates QSettings
         self.log_level_combo.currentIndexChanged.connect(self.update_log_level)
         self.log_level_combo.setToolTip(TooltipManager.PREF_LOG_LEVEL_COMBO)
-        self.log_level_layout_layout = QHBoxLayout(self)
+        self.log_level_layout_layout = QHBoxLayout()
         self.log_level_icon = QLabel()
         self.log_level_icon.setPixmap(IconRegistry.get_icon(IconRegistry.REPORT))
         self.log_level_label = QLabel("Log file error reporting level:")

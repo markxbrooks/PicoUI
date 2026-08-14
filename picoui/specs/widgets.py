@@ -256,6 +256,22 @@ def get_file_save_from_spec(spec: FileSelectionSpec, parent: QWidget) -> tuple[s
     return func(parent, **kwargs)
 
 
+def get_files_load_from_spec(
+    spec: FileSelectionSpec, parent: QWidget
+) -> tuple[list[str], str]:
+    """Open-files dialog; returns (paths, selected_filter) like Qt."""
+    start = _dialog_start_path(spec)
+    opts = wayland_safe_file_dialog_options()
+    kwargs = dict(
+        caption=spec.caption,
+        dir=start,
+        filter=spec.filter,
+    )
+    if opts is not None:
+        kwargs["options"] = opts
+    return QFileDialog.getOpenFileNames(parent, **kwargs)
+
+
 def _dialog_start_path(spec: FileSelectionSpec) -> str:
     """Qt *dir* argument: explicit dir, else path-like default_name, else synthetic name."""
     if spec.dir:
@@ -286,16 +302,18 @@ def _normalize_file_selection_mode(mode: FileSelectionMode | str) -> FileSelecti
 
 @dataclass
 class ActionSpec:
-    """Declarative QAction fields for ``ElMoWindow.action_from_spec``."""
+    """Declarative QAction fields for ``ActionHost.action_from_spec``."""
 
     text: str = ""
     icon: Optional[str] = None
+    qicon: Any = None
     shortcut: Any = None
     status: str = ""
     triggered: Optional[Callable] = None
     toggled: Optional[Callable[[bool], None]] = None
     checkable: bool = False
     checked: Optional[bool] = None
+    enabled: Optional[bool] = None
     shortcut_context: Optional[Qt.ShortcutContext] = None
 
 

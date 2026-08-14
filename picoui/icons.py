@@ -59,6 +59,7 @@ class IconRegistry:
     EXCEL = "mdi.microsoft-excel"
     FILE_MTZ = "mdi.data-matrix-edit"
     FILE_MOLECULE = "mdi.molecule"
+    NUCLEIC = "mdi.dna"
     REPORT = "msc.report"
 
     # Tab icons

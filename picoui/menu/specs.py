@@ -15,10 +15,21 @@ class SubMenu:
 
 
 @dataclass
-class RecentFilesMenu:
-    """``build_menu`` inserts ``ElMoWindow.recent_files_menu`` (filled by ``_refresh_recent_files_menu``)."""
+class NamedMenu:
+    """Insert a pre-built ``QMenu`` stored on the host as ``attr``."""
+
+    attr: str
 
 
 @dataclass
-class RecentDensityMapsMenu:
-    """``build_menu`` inserts ``ElMoWindow.recent_density_maps_menu`` (filled by ``_refresh_recent_density_maps_menu``)."""
+class RecentFilesMenu(NamedMenu):
+    """Named menu at ``recent_files_menu`` (filled by the host)."""
+
+    attr: str = "recent_files_menu"
+
+
+@dataclass
+class RecentDensityMapsMenu(NamedMenu):
+    """Named menu at ``recent_density_maps_menu`` (filled by the host)."""
+
+    attr: str = "recent_density_maps_menu"
