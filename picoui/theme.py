@@ -105,26 +105,93 @@ class ThemeManager(QObject):
 
     @staticmethod
     def palette(theme: str = ThemeType.AUTO) -> QPalette | None:
-        """Return a qdarktheme palette, or ``None`` if unavailable."""
+        """Return a full qdarktheme palette, or ``None`` if unavailable."""
         if not HAS_QDARKTHEME or not hasattr(qdarktheme, "load_palette"):
             return None
         resolved = ThemeManager.resolve(theme)
         try:
+            # for_stylesheet=False fills Base/Button/Window. setup_theme uses
+            # True, which leaves those roles as Qt defaults (white on Windows).
             return qdarktheme.load_palette(resolved)
         except Exception as ex:
             log.error(f"Error loading qdarktheme palette: {ex}")
             return None
 
     @staticmethod
+    def css_colors(theme: str | None = None) -> dict[str, str]:
+        """Hex colors for QSS. Never use CSS ``palette()`` for fills on Windows."""
+        manager = ThemeManager()
+        resolved = ThemeManager.resolve(theme or manager._resolved)
+        pal = ThemeManager.palette(resolved)
+        if pal is None:
+            if resolved == ThemeType.LIGHT:
+                return {
+                    "base": "#ffffff",
+                    "button": "#f0f0f0",
+                    "window": "#f5f5f5",
+                    "text": "#1a1a1a",
+                    "mid": "#c0c0c0",
+                    "highlight": "#0078d4",
+                    "highlighted_text": "#ffffff",
+                    "alternate": "#f5f5f5",
+                }
+            return {
+                "base": "#202124",
+                "button": "#2d2e30",
+                "window": "#202124",
+                "text": "#e8eaed",
+                "mid": "#5f6368",
+                "highlight": "#8ab4f8",
+                "highlighted_text": "#202124",
+                "alternate": "#292a2d",
+            }
+        role = QPalette.ColorRole
+        return {
+            "base": pal.color(role.Base).name(),
+            "button": pal.color(role.Button).name(),
+            "window": pal.color(role.Window).name(),
+            "text": pal.color(role.Text).name(),
+            "mid": pal.color(role.Mid).name(),
+            "highlight": pal.color(role.Highlight).name(),
+            "highlighted_text": pal.color(role.HighlightedText).name(),
+            "alternate": pal.color(role.AlternateBase).name(),
+        }
+
+    @staticmethod
+    def text_widget_stylesheet(
+        selector: str = "QTextEdit",
+        font_family: str | None = None,
+        font_size_pt: int | str | None = None,
+        font_bold: bool = False,
+    ) -> str:
+        """Widget QSS that includes fill colors so Windows does not paint white."""
+        c = ThemeManager.css_colors()
+        parts = [
+            f"background-color: {c['base']}",
+            f"color: {c['text']}",
+            f"border: 1px solid {c['mid']}",
+        ]
+        if font_family:
+            parts.append(f"font-family: {font_family}")
+        if font_size_pt is not None:
+            parts.append(f"font-size: {font_size_pt}pt")
+        parts.append(f"font-weight: {'bold' if font_bold else 'normal'}")
+        return f"{selector} {{ {'; '.join(parts)}; }}"
+
+    @staticmethod
     def apply_theme(
         theme: str = ThemeType.DARK,
         corner_shape: str = "rounded",
+        additional_qss: str | None = None,
+        include_custom: bool = True,
     ) -> bool:
         """
         Apply qdarktheme to the application.
 
         :param theme: ``auto``, ``light``, or ``dark``
         :param corner_shape: qdarktheme corner shape (``rounded`` or ``sharp``)
+        :param additional_qss: Extra QSS merged into qdarktheme (overrides include_custom)
+        :param include_custom: Include PicoUI custom QSS via qdarktheme ``additional_qss``
         :return: True if a theme was applied
         """
         manager = ThemeManager()
@@ -144,27 +211,41 @@ class ThemeManager(QObject):
                 return False
 
             manager._custom_applied = False
+            # Windows native styles ignore dark palettes for tabs and line edits.
+            # Fusion + a full QPalette makes those widgets honor the theme.
+            app.setStyle("Fusion")
+
+            extra = additional_qss
+            if extra is None and include_custom:
+                extra = ThemeManager.get_custom_stylesheet()
 
             if hasattr(qdarktheme, "setup_theme"):
                 try:
-                    qdarktheme.setup_theme(theme, corner_shape=corner_shape)
+                    qdarktheme.setup_theme(
+                        theme,
+                        corner_shape=corner_shape,
+                        additional_qss=extra or None,
+                    )
                 except TypeError:
                     qdarktheme.setup_theme(theme)
-                log.info(f"qdarktheme applied: {theme} (resolved {resolved})")
-                return True
-
-            if hasattr(qdarktheme, "load_stylesheet"):
+                    if extra:
+                        app.setStyleSheet(app.styleSheet() + extra)
+            elif hasattr(qdarktheme, "load_stylesheet"):
                 stylesheet = ThemeManager.stylesheet(theme, corner_shape=corner_shape)
+                if extra:
+                    stylesheet = (stylesheet or "") + extra
                 if stylesheet:
                     app.setStyleSheet(stylesheet)
-                palette = ThemeManager.palette(theme)
-                if palette is not None:
-                    app.setPalette(palette)
-                log.info(f"qdarktheme applied via stylesheet: {resolved}")
-                return True
+            else:
+                log.warning("qdarktheme API not recognized")
+                return False
 
-            log.warning("qdarktheme API not recognized")
-            return False
+            palette = ThemeManager.palette(resolved)
+            if palette is not None:
+                app.setPalette(palette)
+            manager._custom_applied = bool(extra)
+            log.info(f"qdarktheme applied: {theme} (resolved {resolved})")
+            return True
         except Exception as ex:
             log.error(f"Error applying qdarktheme: {ex}")
             return False
@@ -237,27 +318,28 @@ class ThemeManager(QObject):
 
     @staticmethod
     def get_custom_stylesheet() -> str:
-        """Palette-based extras that complement qdarktheme."""
+        """Extras that complement qdarktheme, using hex colors from a full palette."""
         font_family = "Consolas, 'Courier New', monospace"
+        c = ThemeManager.css_colors()
         return f"""
         QWidget {{
             font-family: {font_family};
         }}
 
         QTableView {{
-            gridline-color: palette(mid);
-            selection-background-color: palette(highlight);
-            selection-color: palette(highlighted-text);
-            alternate-background-color: palette(alternate-base);
-            border: 1px solid palette(mid);
+            gridline-color: {c['mid']};
+            selection-background-color: {c['highlight']};
+            selection-color: {c['highlighted_text']};
+            alternate-background-color: {c['alternate']};
+            border: 1px solid {c['mid']};
             border-radius: 8px;
             padding: 4px;
         }}
 
         QHeaderView::section {{
-            background-color: palette(button);
+            background-color: {c['button']};
             padding: 8px 12px;
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 6px;
             font-weight: bold;
             margin: 2px;
@@ -269,27 +351,31 @@ class ThemeManager(QObject):
         }}
 
         QTableView::item:selected {{
-            background-color: palette(highlight);
-            color: palette(highlighted-text);
+            background-color: {c['highlight']};
+            color: {c['highlighted_text']};
         }}
 
         QPushButton {{
             min-height: 20px;
             padding: 4px 8px;
             border-radius: 4px;
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             font-weight: 500;
         }}
 
         QPushButton:hover {{
-            border: 1px solid palette(highlight);
+            border: 1px solid {c['highlight']};
         }}
 
         QTabWidget::pane {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 8px;
             padding: 4px;
-            background-color: palette(base);
+            background-color: {c['base']};
+        }}
+
+        QTabBar {{
+            qproperty-drawBase: 0;
         }}
 
         QTabBar::tab {{
@@ -297,26 +383,27 @@ class ThemeManager(QObject):
             margin-right: 4px;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-bottom: none;
-            background-color: palette(button);
+            background-color: {c['button']};
+            color: {c['text']};
             min-width: 80px;
         }}
 
         QTabBar::tab:selected {{
-            background-color: palette(base);
-            border-bottom: 2px solid palette(highlight);
+            background-color: {c['base']};
+            border-bottom: 2px solid {c['highlight']};
             font-weight: bold;
         }}
 
         QStatusBar {{
-            border-top: 1px solid palette(mid);
-            background-color: palette(window);
+            border-top: 1px solid {c['mid']};
+            background-color: {c['window']};
             padding: 4px;
         }}
 
         QDialog {{
-            background-color: palette(window);
+            background-color: {c['window']};
             border-radius: 12px;
         }}
 
@@ -326,43 +413,47 @@ class ThemeManager(QObject):
         }}
 
         QLineEdit, QTextEdit, QPlainTextEdit {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 6px;
             padding: 6px 10px;
-            background-color: palette(base);
-            color: palette(text);
-            selection-background-color: palette(highlight);
-            selection-color: palette(highlighted-text);
+            background-color: {c['base']};
+            color: {c['text']};
+            selection-background-color: {c['highlight']};
+            selection-color: {c['highlighted_text']};
         }}
 
         QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
-            border: 2px solid palette(highlight);
+            border: 2px solid {c['highlight']};
         }}
 
         QComboBox {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 6px;
             padding: 6px 10px;
             min-height: 20px;
+            background-color: {c['button']};
+            color: {c['text']};
         }}
 
         QComboBox:hover {{
-            border: 1px solid palette(highlight);
+            border: 1px solid {c['highlight']};
         }}
 
         QComboBox::drop-down {{
             border: none;
-            border-left: 1px solid palette(mid);
+            border-left: 1px solid {c['mid']};
             border-top-right-radius: 6px;
             border-bottom-right-radius: 6px;
             width: 20px;
         }}
 
         QComboBox QAbstractItemView {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 6px;
-            selection-background-color: palette(highlight);
-            selection-color: palette(highlighted-text);
+            background-color: {c['base']};
+            color: {c['text']};
+            selection-background-color: {c['highlight']};
+            selection-color: {c['highlighted_text']};
             padding: 4px;
         }}
 
@@ -372,7 +463,7 @@ class ThemeManager(QObject):
         }}
 
         QGroupBox {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 8px;
             margin-top: 12px;
             padding-top: 12px;
@@ -383,60 +474,62 @@ class ThemeManager(QObject):
             subcontrol-origin: margin;
             subcontrol-position: top left;
             padding: 0 8px;
-            background-color: palette(window);
+            background-color: {c['window']};
         }}
 
         QScrollBar:vertical {{
             border: none;
-            background-color: palette(base);
+            background-color: {c['base']};
             width: 12px;
             margin: 0;
             border-radius: 6px;
         }}
 
         QScrollBar::handle:vertical {{
-            background-color: palette(mid);
+            background-color: {c['mid']};
             min-height: 30px;
             border-radius: 6px;
             margin: 2px;
         }}
 
         QScrollBar::handle:vertical:hover {{
-            background-color: palette(highlight);
+            background-color: {c['highlight']};
         }}
 
         QScrollBar:horizontal {{
             border: none;
-            background-color: palette(base);
+            background-color: {c['base']};
             height: 12px;
             margin: 0;
             border-radius: 6px;
         }}
 
         QScrollBar::handle:horizontal {{
-            background-color: palette(mid);
+            background-color: {c['mid']};
             min-width: 30px;
             border-radius: 6px;
             margin: 2px;
         }}
 
         QScrollBar::handle:horizontal:hover {{
-            background-color: palette(highlight);
+            background-color: {c['highlight']};
         }}
 
         QSpinBox, QDoubleSpinBox {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 6px;
             padding: 4px 8px;
             min-height: 24px;
+            background-color: {c['base']};
+            color: {c['text']};
         }}
 
         QSpinBox:focus, QDoubleSpinBox:focus {{
-            border: 2px solid palette(highlight);
+            border: 2px solid {c['highlight']};
         }}
 
         QListWidget, QTreeWidget {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 8px;
             padding: 4px;
         }}
@@ -447,13 +540,13 @@ class ThemeManager(QObject):
         }}
 
         QListWidget::item:selected, QTreeWidget::item:selected {{
-            background-color: palette(highlight);
-            color: palette(highlighted-text);
+            background-color: {c['highlight']};
+            color: {c['highlighted_text']};
         }}
 
         QMenuBar {{
-            background-color: palette(window);
-            border-bottom: 1px solid palette(mid);
+            background-color: {c['window']};
+            border-bottom: 1px solid {c['mid']};
             padding: 4px;
             spacing: 8px;
         }}
@@ -464,14 +557,16 @@ class ThemeManager(QObject):
         }}
 
         QMenuBar::item:selected {{
-            background-color: palette(highlight);
-            color: palette(highlighted-text);
+            background-color: {c['highlight']};
+            color: {c['highlighted_text']};
         }}
 
         QMenu {{
-            border: 1px solid palette(mid);
+            border: 1px solid {c['mid']};
             border-radius: 6px;
             padding: 4px;
+            background-color: {c['window']};
+            color: {c['text']};
         }}
 
         QMenu::item {{
@@ -480,36 +575,33 @@ class ThemeManager(QObject):
         }}
 
         QMenu::item:selected {{
-            background-color: palette(highlight);
-            color: palette(highlighted-text);
+            background-color: {c['highlight']};
+            color: {c['highlighted_text']};
         }}
 
         QMenu::separator {{
             height: 1px;
-            background-color: palette(mid);
+            background-color: {c['mid']};
             margin: 4px 8px;
         }}
         """
 
     @staticmethod
     def apply_custom_stylesheet() -> bool:
-        """Append PicoUI custom CSS to the current application stylesheet."""
+        """Re-apply theme with PicoUI custom QSS via qdarktheme additional_qss."""
+        manager = ThemeManager()
+        if HAS_QDARKTHEME:
+            return ThemeManager.apply_theme(
+                manager._theme,
+                manager._corner_shape,
+                include_custom=True,
+            )
         try:
             app = QApplication.instance()
             if not app:
                 log.warning("No QApplication instance found for stylesheet application")
                 return False
-
-            custom_css = ThemeManager.get_custom_stylesheet()
-            manager = ThemeManager()
-            if manager._custom_applied:
-                return True
-            current = app.styleSheet()
-            if current:
-                app.setStyleSheet(current + custom_css)
-            else:
-                app.setStyleSheet(custom_css)
-            log.info("Custom stylesheet applied")
+            app.setStyleSheet(ThemeManager.get_custom_stylesheet())
             manager._custom_applied = True
             return True
         except Exception as ex:
@@ -527,17 +619,20 @@ class ThemeManager(QObject):
         Initialize the theme system.
 
         :param theme: ``auto``, ``light``, or ``dark``
-        :param apply_custom: Whether to append PicoUI custom CSS
+        :param apply_custom: Whether to include PicoUI custom CSS
         :param apply_qdarktheme: Whether to apply qdarktheme
         :param corner_shape: qdarktheme corner shape
         :return: True if requested steps succeeded
         """
-        success = True
         if apply_qdarktheme:
-            success = ThemeManager.apply_theme(theme, corner_shape=corner_shape)
+            return ThemeManager.apply_theme(
+                theme,
+                corner_shape=corner_shape,
+                include_custom=apply_custom,
+            )
         if apply_custom:
-            success = ThemeManager.apply_custom_stylesheet() and success
-        return success
+            return ThemeManager.apply_custom_stylesheet()
+        return True
 
     @staticmethod
     def get_progress_bar_style(use_custom_colors: bool = False) -> str:
@@ -565,24 +660,18 @@ class ThemeManager(QObject):
             }
             """
         return """
-            QProgressBar {
-                background-color: palette(mid);
-                color: palette(text);
+            QProgressBar {{
+                background-color: {mid};
+                color: {text};
                 border-style: none;
                 border-radius: 10px;
                 text-align: center;
                 height: 20px;
                 min-width: 300px;
-            }
+            }}
 
-            QProgressBar::chunk {
+            QProgressBar::chunk {{
                 border-radius: 10px;
-                background: qlineargradient(
-                    spread:pad,
-                    x1:0, y1:0.5,
-                    x2:1, y2:0.5,
-                    stop:0 palette(highlight),
-                    stop:1 palette(highlight)
-                );
-            }
-            """
+                background-color: {highlight};
+            }}
+            """.format(**ThemeManager.css_colors())

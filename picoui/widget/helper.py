@@ -279,7 +279,8 @@ def create_line_edit_from_spec(spec: LineEditSpec) -> QLineEdit:
 def create_line_edit(style_sheet: str, placeholder: str, slot: Optional[Callable] = None) -> QLineEdit:
     """create line edit"""
     line_edit = QLineEdit()
-    line_edit.setStyleSheet(style_sheet)
+    if style_sheet:
+        line_edit.setStyleSheet(style_sheet)
     line_edit.setPlaceholderText(placeholder)
     line_edit.textChanged.connect(slot)
     return line_edit
