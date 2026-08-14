@@ -8,7 +8,7 @@ from matplotlib.backends.backend_qt5agg import \
 from matplotlib.figure import Figure
 
 from picoui.matplotlib.config import AxesConfig
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QSizePolicy, QVBoxLayout, QWidget
 
 from picoui.matplotlib.configure import apply_axes_config
 
@@ -38,6 +38,7 @@ class MatplotlibPlotWidget(QWidget):
         self.axes_config = axes_config or AxesConfig()
         self.figure = Figure(figsize=figsize, dpi=dpi)
         self.canvas = FigureCanvas(self.figure)
+        self.canvas.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.ax = self.figure.add_subplot(111)
         self.apply_axes_config()
 
@@ -52,9 +53,15 @@ class MatplotlibPlotWidget(QWidget):
         self.axes_config = cfg
         apply_axes_config(cfg, self.ax)
 
+    def clear_axes(self) -> None:
+        """Clear the current axes without replacing it."""
+        self.ax.clear()
+        self.apply_axes_config()
+
     def redraw(self) -> None:
-        """Redraw the canvas."""
+        """Redraw the canvas immediately so Qt shows the latest artists."""
         self.canvas.draw()
+        self.canvas.flush_events()
 
     def export_figure(self, filename: str, *, dpi: int = 300) -> None:
         """export the figure to a file."""
