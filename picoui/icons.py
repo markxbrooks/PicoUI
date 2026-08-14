@@ -10,7 +10,7 @@ from pathlib import Path
 import qtawesome as qta
 from decologr import Decologr as log
 from picoui.dimensions import PicoUiDimensions
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QIcon, QPixmap
 
 
 def resource_path(path: Path) -> Path:
@@ -117,6 +117,63 @@ class IconRegistry:
     BACKGROUND_TOGGLE = "fa5s.yin-yang"
     AUTO_ROTATE = "mdi.axis-z-rotate-clockwise"
 
+    # Biotoolkit
+    OUTPUT = "msc.output"
+    SEARCH_LINE = "ri.search-2-line"
+    SEARCH_RI = "ri.search-line"
+    DATABASE_SEARCH = "mdi.database-search-outline"
+    FA_DATABASE = "fa5s.database"
+    EXIT = "mdi.exit-to-app"
+    CUT = "mdi.content-cut"
+    COPY = "msc.copy"
+    FIND = "mdi6.file-find-outline"
+    PASTE = "mdi6.content-paste"
+    SELECT_ALL = "mdi6.arrow-expand-all"
+    REDO = "mdi6.redo-variant"
+    UNDO = "mdi6.undo-variant"
+    FONT = "mdi6.format-font"
+    COLOR = "msc.symbol-color"
+    NUMBERED_LIST = "mdi.format-list-numbered-rtl"
+    CONVERT = "ri.exchange-box-line"
+    HELP_RHOMBUS = "mdi6.help-rhombus-outline"
+    ZOOM_IN = "msc.zoom-in"
+    ZOOM_OUT = "msc.zoom-out"
+    SCREEN_NORMAL = "msc.screen-normal"
+    FIT_TO_PAGE = "mdi.fit-to-page-outline"
+    FILE_DOCUMENT_EDIT = "mdi6.file-document-edit-outline"
+    PAINT_BRUSH = "fa5s.paint-brush"
+    HIGHLIGHTER = "fa5s.highlighter"
+    FONT_SIZE = "ei.fontsize"
+    TEXT_BOX_PLUS = "mdi6.text-box-plus-outline"
+    WEIGHT = "fa5s.weight"
+    TEXT_ALIGN_LEFT = "ph.text-align-left"
+    USER_SECRET = "fa5s.user-secret"
+    PALETTE = "fa5s.palette"
+    TABLE_ROW_ADD = "mdi.table-row-plus-after"
+    TABLE_ROW_REMOVE = "mdi.table-row-remove"
+    TABLE_ROW_HEIGHT = "mdi6.table-row-height"
+    INSERT_ROW = "ri.insert-row-top"
+    DELETE_ROW = "ri.delete-row"
+    FILE_CSV = "fa5s.file-csv"
+    DATABASE_SYNC = "mdi6.database-sync-outline"
+    FILTER = "msc.filter-filled"
+    TABLE_COLUMN = "mdi.table-column"
+    MSC_REFRESH = "msc.refresh"
+    ARROW_RIGHT = "mdi.arrow-right"
+    CHART_GANTT = "mdi6.chart-gantt"
+    FLASK = "fa5s.flask"
+    TEST_TUBE = "ri.test-tube-fill"
+    CUBE = "fa5s.cube"
+    CHROME = "fa5b.chrome"
+    DEBUG_BREAKPOINT = "msc.debug-breakpoint-data-unverified"
+    FOLDER_MARKER = "mdi6.folder-marker-outline"
+    FOLDER_MULTIPLE_PLUS = "mdi6.folder-multiple-plus-outline"
+    FILE_DOCUMENT_MULTIPLE = "mdi.file-document-multiple"
+    FOLDER_OPEN_THIN = "ph.folder-notch-open-thin"
+    FA_INFO = "fa5s.info-circle"
+    LICENSE = "fa5s.id-card"
+    EI_ALIGN_LEFT = "ei.align-left"
+
     @staticmethod
     def get_pixmap(icon_name: str) -> QPixmap:
         filename = IconRegistry.pixmaps.get(icon_name)
@@ -160,18 +217,17 @@ class IconRegistry:
             return None
 
     @staticmethod
-    def get_icon_safe(icon_name: str, fallback: str = None):
+    def get_icon_safe(icon_name: str, fallback: str = None) -> QIcon:
         """
-        Get icons with fallback support, returns empty QIcon if all fail.
-
-        This version always returns a QIcon object (may be empty).
+        Get a QIcon with fallback support. Always returns a QIcon (may be empty).
 
         :param icon_name: Icon identifier
         :param fallback: Fallback icons if primary fails
         :return: QIcon (may be empty if all fail)
         """
-        icon = IconRegistry.get_icon(icon_name, fallback)
-        if icon is None:
-            # Return empty icons
-            return qta.icon("")
-        return icon
+        pixmap = IconRegistry.get_icon(icon_name, fallback)
+        if pixmap is None or pixmap.isNull():
+            return QIcon()
+        if isinstance(pixmap, QIcon):
+            return pixmap
+        return QIcon(pixmap)
