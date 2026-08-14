@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any, Callable, List, Optional, Protocol
 
 from decologr import Decologr as log
+from picoui.dimensions import Dimensions
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout,
@@ -147,6 +148,20 @@ class IconSpec(LeafSpec):
     name: str = ""
     width: int = 40
     height: int = 40
+
+
+@dataclass
+class LabelSpec:
+    """Label with optional icon, stylesheet, and fixed size."""
+
+    label: str | None = None
+    icon: str | None = None
+    style: str | None = None
+    slot: Callable | None = None
+    dimensions: Dimensions | None = None
+    alignment: Qt.AlignmentFlag | None = None
+    word_wrap: bool = False
+    tooltip: str | None = None
 
 
 @dataclass

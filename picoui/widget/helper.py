@@ -16,7 +16,7 @@ from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
 from picoui.icons import IconRegistry
 from picoui.specs.widgets import (ButtonSpec, CheckBoxSpec, ComboBoxSpec,
                                   DoubleSpinBoxSpec, FileSelectionSpec,
-                                  SpinBoxSpec, TabSpec,
+                                  LabelSpec, SpinBoxSpec, TabSpec,
                                   wayland_safe_file_dialog_options, LineEditSpec, BaseSpinBoxSpec)
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt
@@ -161,6 +161,28 @@ def create_button(label: Optional[str] = None, tooltip: Optional[str] = None, sp
 def create_button_from_spec(spec: ButtonSpec) -> QPushButton:
     """Create a button from a ButtonSpec."""
     return create_button(spec=spec)
+
+
+def create_label_from_spec(spec: LabelSpec) -> QLabel:
+    """Create a QLabel from a LabelSpec."""
+    label = QLabel(spec.label or "")
+    if spec.dimensions is not None:
+        label.setFixedSize(*spec.dimensions.to_tuple())
+    if spec.style is not None:
+        label.setStyleSheet(spec.style)
+    if spec.alignment is not None:
+        label.setAlignment(spec.alignment)
+    if spec.word_wrap:
+        label.setWordWrap(True)
+    if spec.tooltip:
+        label.setToolTip(spec.tooltip)
+    if spec.icon:
+        pixmap = IconRegistry.get_icon(spec.icon)
+        if pixmap is not None:
+            label.setPixmap(pixmap)
+    if spec.slot is not None:
+        label.mousePressEvent = lambda event, slot=spec.slot: slot()
+    return label
 
 
 def create_group_with_items(
