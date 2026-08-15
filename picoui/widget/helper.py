@@ -169,7 +169,10 @@ def create_label_from_spec(spec: LabelSpec) -> QLabel:
     if spec.dimensions is not None:
         label.setFixedSize(*spec.dimensions.to_tuple())
     if spec.style is not None:
-        label.setStyleSheet(spec.style)
+        style = spec.style
+        if "background" not in style.lower():
+            style = f"background: transparent; {style}"
+        label.setStyleSheet(style)
     if spec.alignment is not None:
         label.setAlignment(spec.alignment)
     if spec.word_wrap:

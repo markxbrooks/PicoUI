@@ -10,9 +10,9 @@ from __future__ import annotations
 from typing import Optional
 
 from decologr import Decologr as log
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QPalette
-from PySide6.QtWidgets import QApplication, QWidget
+from PySide6.QtWidgets import QApplication, QStyleFactory, QWidget
 
 try:
     import darkdetect
@@ -211,31 +211,34 @@ class ThemeManager(QObject):
                 return False
 
             manager._custom_applied = False
-            # Windows native styles ignore dark palettes for tabs and line edits.
-            # Fusion + a full QPalette makes those widgets honor the theme.
-            app.setStyle("Fusion")
-
+            propagate = getattr(
+                Qt.ApplicationAttribute,
+                "AA_UseStyleSheetPropagationInWidgetStyles",
+                None,
+            )
+            if propagate is not None:
+                app.setAttribute(propagate, True)
             extra = additional_qss
             if extra is None and include_custom:
                 extra = ThemeManager.get_custom_stylesheet()
 
-            if hasattr(qdarktheme, "setup_theme"):
+            # setup_theme() installs QDarkThemeStyle, which on Windows proxies the
+            # native style. That style ignores QSS fills for unselected tabs and
+            # QGroupBox titles. Fusion + stylesheet + a full palette honors them.
+            if hasattr(qdarktheme, "stop_sync"):
                 try:
-                    qdarktheme.setup_theme(
-                        theme,
-                        corner_shape=corner_shape,
-                        additional_qss=extra or None,
-                    )
-                except TypeError:
-                    qdarktheme.setup_theme(theme)
-                    if extra:
-                        app.setStyleSheet(app.styleSheet() + extra)
-            elif hasattr(qdarktheme, "load_stylesheet"):
-                stylesheet = ThemeManager.stylesheet(theme, corner_shape=corner_shape)
-                if extra:
-                    stylesheet = (stylesheet or "") + extra
-                if stylesheet:
-                    app.setStyleSheet(stylesheet)
+                    qdarktheme.stop_sync()
+                except Exception:
+                    pass
+
+            fusion = QStyleFactory.create("Fusion")
+            app.setStyle(fusion if fusion is not None else "Fusion")
+
+            stylesheet = ThemeManager.stylesheet(resolved, corner_shape=corner_shape)
+            if extra:
+                stylesheet = (stylesheet or "") + extra
+            if stylesheet:
+                app.setStyleSheet(stylesheet)
             else:
                 log.warning("qdarktheme API not recognized")
                 return False
@@ -376,6 +379,7 @@ class ThemeManager(QObject):
 
         QTabBar {{
             qproperty-drawBase: 0;
+            background-color: transparent;
         }}
 
         QTabBar::tab {{
@@ -390,8 +394,14 @@ class ThemeManager(QObject):
             min-width: 80px;
         }}
 
+        QTabBar::tab:!selected {{
+            background-color: {c['button']};
+            color: {c['text']};
+        }}
+
         QTabBar::tab:selected {{
             background-color: {c['base']};
+            color: {c['text']};
             border-bottom: 2px solid {c['highlight']};
             font-weight: bold;
         }}
@@ -463,6 +473,8 @@ class ThemeManager(QObject):
         }}
 
         QGroupBox {{
+            background-color: {c['window']};
+            color: {c['text']};
             border: 1px solid {c['mid']};
             border-radius: 8px;
             margin-top: 12px;
@@ -474,7 +486,12 @@ class ThemeManager(QObject):
             subcontrol-origin: margin;
             subcontrol-position: top left;
             padding: 0 8px;
+            color: {c['text']};
             background-color: {c['window']};
+        }}
+
+        QLabel {{
+            background-color: transparent;
         }}
 
         QScrollBar:vertical {{
