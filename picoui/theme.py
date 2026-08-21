@@ -13,6 +13,7 @@ from decologr import Decologr as log
 from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QApplication, QStyleFactory, QWidget
+from picoui.utils.strenum import StrEnum
 
 try:
     import darkdetect
@@ -29,7 +30,7 @@ except ImportError:
     HAS_QDARKTHEME = False
 
 
-class ThemeType:
+class ThemeType(StrEnum):
     """Supported theme modes."""
 
     DARK = "dark"
