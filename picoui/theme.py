@@ -15,6 +15,7 @@ from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QApplication, QStyleFactory, QWidget
 from picoui.utils.strenum import StrEnum
 
+
 try:
     import darkdetect
 
@@ -54,8 +55,8 @@ class ThemeManager(QObject):
             return
         super().__init__()
         self._initialized = True
-        self._theme: str = ThemeType.AUTO
-        self._resolved: str = ThemeType.DARK
+        self._theme: ThemeType = ThemeType.AUTO
+        self._resolved: ThemeType = ThemeType.DARK
         self._corner_shape: str = "rounded"
         self._custom_applied: bool = False
 
@@ -81,7 +82,7 @@ class ThemeManager(QObject):
             return ThemeType.DARK
 
     @staticmethod
-    def resolve(theme: str = ThemeType.AUTO) -> str:
+    def resolve(theme: ThemeType = ThemeType.AUTO) -> str:
         """Resolve ``auto`` to a concrete light/dark value."""
         if theme == ThemeType.AUTO:
             return ThemeManager.detect()
@@ -91,7 +92,7 @@ class ThemeManager(QObject):
         return ThemeType.DARK
 
     @staticmethod
-    def stylesheet(theme: str = ThemeType.AUTO, corner_shape: str = "rounded") -> str:
+    def stylesheet(theme: ThemeType = ThemeType.AUTO, corner_shape: str = "rounded") -> str:
         """Return a qdarktheme stylesheet, or an empty string if unavailable."""
         if not HAS_QDARKTHEME or not hasattr(qdarktheme, "load_stylesheet"):
             return ""
@@ -105,7 +106,7 @@ class ThemeManager(QObject):
             return ""
 
     @staticmethod
-    def palette(theme: str = ThemeType.AUTO) -> QPalette | None:
+    def palette(theme: ThemeType = ThemeType.AUTO) -> QPalette | None:
         """Return a full qdarktheme palette, or ``None`` if unavailable."""
         if not HAS_QDARKTHEME or not hasattr(qdarktheme, "load_palette"):
             return None
@@ -181,7 +182,7 @@ class ThemeManager(QObject):
 
     @staticmethod
     def apply_theme(
-        theme: str = ThemeType.DARK,
+        theme: ThemeType = ThemeType.DARK,
         corner_shape: str = "rounded",
         additional_qss: str | None = None,
         include_custom: bool = True,
@@ -628,7 +629,7 @@ class ThemeManager(QObject):
 
     @staticmethod
     def initialize(
-        theme: str = ThemeType.AUTO,
+        theme: ThemeType = ThemeType.AUTO,
         apply_custom: bool = True,
         apply_qdarktheme: bool = True,
         corner_shape: str = "rounded",
