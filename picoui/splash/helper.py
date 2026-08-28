@@ -1,35 +1,44 @@
 """
-This module provides functionality for setting up and displaying a splash
-screen for a given application. It includes progress updates to simulate
-a loading process.
-
-Functions:
-- setup_splash_screen: Sets up and animates a splash screen for a given
-  application.
+Splash screen setup and progress animation helpers.
 """
-from picoui.dimensions import Dimensions
+from __future__ import annotations
+
+import time
+from typing import TYPE_CHECKING
+
 from picoui.splash.config import SplashScreenConfig
 from picoui.splash.screen import SplashScreen
 
+if TYPE_CHECKING:
+    from PySide6.QtWidgets import QApplication
 
-def setup_splash_screen(app, config: SplashScreenConfig):
-    """Sets up and animates a splash screen for a given application."""
+
+def create_splash_screen(config: SplashScreenConfig) -> SplashScreen:
+    """Create a splash screen widget from *config*."""
+    return SplashScreen(config)
+
+
+def animate_splash_progress(
+    splash: SplashScreen,
+    app: QApplication,
+    *,
+    steps: int = 101,
+    delay: float = 0.03,
+) -> None:
+    """Animate the splash progress bar from 0 to 100."""
+    if splash.progress_bar is None:
+        return
+    for value in range(steps):
+        splash.progress_bar.setValue(value)
+        app.processEvents()
+        time.sleep(delay)
+
+
+def setup_splash_screen(app: QApplication, config: SplashScreenConfig) -> None:
+    """Set up, animate, and close a splash screen for *app*."""
     splash = create_splash_screen(config)
     splash.show()
-    splash.raise_()  # Ensure the splash screen is raised
-    splash.activateWindow()  # Activate the splash screen window
-    import time
-
-    for i in range(101):
-        splash.progress_bar.setValue(i)
-        app.processEvents()
-        time.sleep(0.03)
+    splash.raise_()
+    splash.activateWindow()
+    animate_splash_progress(splash, app)
     splash.close()
-
-
-def create_splash_screen(config: SplashScreenConfig,
-                         dimensions: Dimensions = Dimensions(width=500, height=400)) -> SplashScreen:
-    """create splash screen (Qt) for the ElMo application."""
-    splash = SplashScreen(config)
-    splash.setFixedSize(*dimensions.to_tuple())
-    return splash

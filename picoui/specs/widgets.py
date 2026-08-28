@@ -164,6 +164,45 @@ class LabelSpec:
     tooltip: str | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class ProgressBarSpec:
+    """Progress bar specification for splash and loading UIs."""
+
+    range_min: int = 0
+    range_max: int = 100
+    start_value: int = 0
+    height: int = 22
+    text_visible: bool = True
+    format_text: str = "loading"
+
+
+@dataclass(frozen=True, slots=True)
+class LogoSpec:
+    """Pixmap logo label specification."""
+
+    path: str | None = None
+    size: Dimensions = field(
+        default_factory=lambda: Dimensions(width=250, height=150)
+    )
+    alignment: Qt.AlignmentFlag = Qt.AlignmentFlag.AlignCenter
+    smooth: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class GroupBoxSpec:
+    """Titled group box specification for splash screens."""
+
+    title: str = ""
+    title_fonts: tuple[str, ...] = (
+        "Myriad Pro",
+        "Segoe UI",
+        "Arial",
+    )
+    title_size: int = 20
+    foreground_color: str = "white"
+    alignment: Qt.AlignmentFlag = Qt.AlignmentFlag.AlignHCenter
+
+
 @dataclass
 class WindowSpec(UiNodeSpec):
     """WindowSpec"""

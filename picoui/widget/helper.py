@@ -16,15 +16,17 @@ from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
 from picoui.icons import IconRegistry
 from picoui.specs.widgets import (ButtonSpec, CheckBoxSpec, ComboBoxSpec,
                                   DoubleSpinBoxSpec, FileSelectionSpec,
-                                  LabelSpec, SpinBoxSpec, TabSpec,
-                                  wayland_safe_file_dialog_options, LineEditSpec, BaseSpinBoxSpec)
+                                  GroupBoxSpec, LabelSpec, LineEditSpec,
+                                  LogoSpec, SpinBoxSpec, TabSpec,
+                                  wayland_safe_file_dialog_options, BaseSpinBoxSpec)
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QFontInfo, QPixmap
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
                                QDoubleSpinBox, QFileDialog, QFormLayout,
                                QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QSpinBox, QTabWidget,
-                               QWidget)
+                               QVBoxLayout, QWidget)
 
 TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 
@@ -341,3 +343,59 @@ def add_tab_from_spec(parent: QWidget, tab_widget: QTabWidget, spec: TabSpec):
             IconRegistry.get_icon(spec.icon),
             spec.name,
         )
+
+
+def create_logo_label_from_spec(spec: LogoSpec) -> QLabel:
+    """Create a centered logo label from a :class:`~picoui.specs.widgets.LogoSpec`."""
+    label = QLabel()
+    label.setAlignment(spec.alignment)
+    if spec.path:
+        transform = Qt.TransformationMode.SmoothTransformation
+        if not spec.smooth:
+            transform = Qt.TransformationMode.FastTransformation
+        pixmap = QPixmap(spec.path).scaled(
+            *spec.size.to_tuple(),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            transform,
+        )
+        label.setPixmap(pixmap)
+    return label
+
+
+def create_group_box_from_spec(
+    spec: GroupBoxSpec,
+) -> tuple[QGroupBox, QVBoxLayout]:
+    """Create a titled group box and its centered vertical layout."""
+    group_box = QGroupBox(spec.title)
+    group_box.setAlignment(spec.alignment)
+    for font_name in spec.title_fonts:
+        font = QFont(font_name, spec.title_size)
+        font.setBold(True)
+        if QFontInfo(font).family() == font_name:
+            group_box.setFont(font)
+            break
+    group_box.setStyleSheet(
+        f"color: {spec.foreground_color}; font-weight: bold;"
+    )
+    group_layout = QVBoxLayout()
+    group_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    group_box.setLayout(group_layout)
+    return group_box, group_layout
+
+
+def apply_splash_subtitle_style(label: QLabel, config: "SplashScreenConfig") -> None:
+    """Apply splash theme foreground and subtitle typography to *label*."""
+    from picoui.splash.config import SplashScreenConfig
+
+    if not isinstance(config, SplashScreenConfig):
+        raise TypeError("config must be a SplashScreenConfig")
+    label.setMinimumHeight(80)
+    label.setFixedSize(config.dimensions.width - 25, 80)
+    label.setStyleSheet(
+        "QLabel{"
+        "background: transparent;"
+        f"color: {config.foreground_color};"
+        f"font-family: '{config.theme.subtitle_font}';"
+        f"font-size: {config.theme.subtitle_size}px;"
+        "}"
+    )

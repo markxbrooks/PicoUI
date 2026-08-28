@@ -1,111 +1,83 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QGroupBox, QLabel
-
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QGroupBox, QProgressBar, QVBoxLayout, QWidget
 
-from PySide6.QtGui import QFont, QFontInfo, QPixmap
+from picoui.helpers.layout import create_layout_with_items, create_progress_bar_from_spec
+from picoui.splash.config import SplashScreenConfig, group_spec_from_config
+from picoui.widget.helper import (
+    apply_splash_subtitle_style,
+    create_group_box_from_spec,
+    create_label_from_spec,
+    create_logo_label_from_spec,
+)
 
-from picoui.helpers.layout import create_progress_bar, create_layout_with_items
-from picoui.splash.config import SplashScreenConfig
-from picoui.widget.helper import create_label_from_spec
+
+def _is_transparent_background(color: str) -> bool:
+    return color.strip().lower() == "transparent"
 
 
 class SplashScreen(QWidget):
+    """Spec-driven splash screen widget."""
 
     def __init__(self, config: SplashScreenConfig):
         super().__init__()
-
         self.config = config
         self.progress_bar: QProgressBar | None = None
-
         self._build_ui()
 
-    def _build_ui(self):
+    def _build_ui(self) -> None:
         self.setWindowFlags(
-            Qt.SplashScreen |
-            Qt.FramelessWindowHint |
-            Qt.WindowStaysOnTopHint
+            Qt.WindowType.SplashScreen
+            | Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
         )
-
         self.setFixedSize(*self.config.dimensions.to_tuple())
-        self.setStyleSheet(
-            f"background-color: {self.config.background_color};"
-        )
-
-        layout = QVBoxLayout(self)
-        layout.setSpacing(self.config.spacing)
-
-        group = self._create_group()
-        group_layout = group.layout()
-
-        group_layout.addWidget(self._create_logo())
-        if self.config.show_progress:
-            group_layout.addLayout(self._create_progress_bar())
-        group_layout.addWidget(self._create_subtitle())
-        layout.addWidget(group)
-
-    def _create_group(self) -> QGroupBox:
-        """Create the titled group box that holds logo, progress, and subtitle."""
-        group_box = QGroupBox(self.config.title or __program__)
-        group_box.setAlignment(Qt.AlignHCenter)
-
-        # Title styling
-        font_size = self.config.theme.title_size
-        preferred_fonts = self.config.theme.title_font
-        for font_name in preferred_fonts:
-            font = QFont(font_name, font_size)
-            font.setBold(True)
-            if QFontInfo(font).family() == font_name:
-                group_box.setFont(font)
-                break
-
-        group_box.setStyleSheet(
-            f"color: {self.config.foreground_color}; font-weight: bold;"
-        )
-
-        group_layout = QVBoxLayout()
-        group_layout.setAlignment(Qt.AlignCenter)
-        group_box.setLayout(group_layout)
-        return group_box
-
-    def _create_logo(self) -> QLabel:
-        """Create the logo label."""
-        label = QLabel()
-        label.setAlignment(Qt.AlignCenter)
-
-        if self.config.logo_path:
-            pixmap = QPixmap(self.config.logo_path).scaled(
-                *self.config.logo_size.to_tuple(),
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation,
+        transparent = _is_transparent_background(self.config.background_color)
+        if transparent:
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+            self.setStyleSheet("background: transparent;")
+        else:
+            self.setStyleSheet(
+                f"background-color: {self.config.background_color};"
             )
-            label.setPixmap(pixmap)
 
-        return label
-
-    def _create_progress_bar(self) -> QVBoxLayout:
-        """Create the progress bar layout and assign the instance bar."""
-        self.progress_bar = create_progress_bar()
-        progress_container = create_layout_with_items(
-            items=[self.progress_bar],
-            start_stretch=True,
-            end_stretch=True,
-        )
-        return progress_container
-
-    def _create_subtitle(self) -> QLabel:
-        """Create the subtitle label."""
-        label = create_label_from_spec(self.config.subtitle)
-        label.setMinimumHeight(80)
-        label.setFixedSize(
-            self.config.dimensions.width - 25,
-            80,
+        outer = create_layout_with_items(
+            parent=self,
+            items=[],
+            vertical=True,
+            start_stretch=False,
+            end_stretch=False,
+            spacing=self.config.spacing,
         )
 
-        label.setStyleSheet(
-            "QLabel{"
-            f"color: {self.config.foreground_color};"
-            f"font-family: '{self.config.subtitle_font_family}';"
-            f"font-size: {self.config.subtitle_font_size}px;"
-            "}"
-        )
-        return label
+        group_spec = self.config.group or group_spec_from_config(self.config)
+        group, group_layout = create_group_box_from_spec(group_spec)
+        if transparent:
+            _apply_transparent_panel_style(group)
+
+        logo = create_logo_label_from_spec(self.config.logo)
+        if transparent:
+            logo.setStyleSheet("background: transparent;")
+        group_layout.addWidget(logo)
+        if self.config.show_progress:
+            self.progress_bar = create_progress_bar_from_spec(self.config.progress)
+            group_layout.addLayout(
+                create_layout_with_items(
+                    items=[self.progress_bar],
+                    start_stretch=True,
+                    end_stretch=True,
+                )
+            )
+
+        subtitle = create_label_from_spec(self.config.subtitle_label_spec())
+        apply_splash_subtitle_style(subtitle, self.config)
+        group_layout.addWidget(subtitle)
+
+        outer.addWidget(group)
+
+
+def _apply_transparent_panel_style(widget: QGroupBox) -> None:
+    """Remove opaque panel chrome so the splash shows through."""
+    existing = widget.styleSheet() or ""
+    widget.setStyleSheet(
+        f"{existing} QGroupBox {{ background: transparent; border: none; }}"
+    )
