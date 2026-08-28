@@ -6,6 +6,7 @@ from PySide6.QtGui import QFont, QFontInfo, QPixmap
 
 from picoui.helpers.layout import create_progress_bar, create_layout_with_items
 from picoui.splash.config import SplashScreenConfig
+from picoui.widget.helper import create_label_from_spec
 
 
 class SplashScreen(QWidget):
@@ -40,7 +41,6 @@ class SplashScreen(QWidget):
         if self.config.show_progress:
             group_layout.addLayout(self._create_progress_bar())
         group_layout.addWidget(self._create_subtitle())
-        self.setStyleSheet(config.style)
         layout.addWidget(group)
 
     def _create_group(self) -> QGroupBox:
@@ -94,8 +94,7 @@ class SplashScreen(QWidget):
 
     def _create_subtitle(self) -> QLabel:
         """Create the subtitle label."""
-        label = QLabel(self.config.subtitle)
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label = create_label_from_spec(self.config.subtitle)
         label.setMinimumHeight(80)
         label.setFixedSize(
             self.config.dimensions.width - 25,
