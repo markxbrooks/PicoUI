@@ -40,7 +40,7 @@ class SplashScreen(QWidget):
         if self.config.show_progress:
             group_layout.addLayout(self._create_progress_bar())
         group_layout.addWidget(self._create_subtitle())
-
+        self.setStyleSheet(config.style)
         layout.addWidget(group)
 
     def _create_group(self) -> QGroupBox:

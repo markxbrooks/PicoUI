@@ -32,5 +32,4 @@ def create_splash_screen(config: SplashScreenConfig,
     """create splash screen (Qt) for the ElMo application."""
     splash = SplashScreen(config)
     splash.setFixedSize(*dimensions.to_tuple())
-    splash.setStyleSheet(config.style)
     return splash
