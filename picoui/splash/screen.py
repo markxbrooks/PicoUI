@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QProgressBar, QVBoxLayout, QWidget
 from picoui.splash.config import SplashScreenConfig
 from picoui.splash.panel import build_jdxi_splash_panel
 from picoui.splash.styles import (
-    JDXI_SPLASH_STYLESHEET,
+    SPLASH_STYLESHEET,
     SPLASH_CONTENT_MARGINS,
     SPLASH_CONTENT_SPACING,
     SPLASH_TITLE_GEOMETRY,
@@ -34,7 +34,7 @@ class SplashScreen(QWidget):
             | Qt.WindowType.WindowStaysOnTopHint
         )
         self.setFixedSize(*self.config.dimensions.to_tuple())
-        self.setStyleSheet(JDXI_SPLASH_STYLESHEET)
+        self.setStyleSheet(SPLASH_STYLESHEET)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(*SPLASH_CONTENT_MARGINS)
