@@ -58,6 +58,8 @@ class SplashScreenConfig:
     background_color: str = "black"
     foreground_color: str = "white"
     show_progress: bool = True
+    status_text: str = "Starting..."
+    credits_text: str | None = None
 
     @property
     def logo_path(self) -> str | None:
@@ -84,6 +86,8 @@ class SplashScreenConfig:
         background_color: str = "black",
         foreground_color: str = "white",
         show_progress: bool = True,
+        status_text: str = "Starting...",
+        credits_text: str | None = None,
         style: str | None = None,
         logo_path: str | None = None,
     ) -> SplashScreenConfig:
@@ -116,6 +120,8 @@ class SplashScreenConfig:
             background_color=resolved_background,
             foreground_color=foreground_color,
             show_progress=show_progress,
+            status_text=status_text,
+            credits_text=credits_text,
         )
 
     def subtitle_label_spec(self) -> LabelSpec:

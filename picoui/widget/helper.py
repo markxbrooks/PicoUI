@@ -375,7 +375,14 @@ def create_group_box_from_spec(
             group_box.setFont(font)
             break
     group_box.setStyleSheet(
-        f"color: {spec.foreground_color}; font-weight: bold;"
+        "QGroupBox {"
+        f"color: {spec.foreground_color};"
+        "font-weight: bold;"
+        "}"
+        "QGroupBox::title {"
+        f"color: {spec.foreground_color};"
+        "subcontrol-origin: margin;"
+        "}"
     )
     group_layout = QVBoxLayout()
     group_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)

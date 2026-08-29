@@ -18,6 +18,19 @@ def create_splash_screen(config: SplashScreenConfig) -> SplashScreen:
     return SplashScreen(config)
 
 
+def center_splash_on_screen(splash: SplashScreen, app: QApplication) -> None:
+    """Center *splash* on the primary screen (Qt 6 / QScreen)."""
+    screen = app.primaryScreen()
+    if screen is None:
+        return
+    geometry = screen.availableGeometry()
+    center = geometry.center()
+    splash.move(
+        int(center.x() - splash.width() / 2),
+        int(center.y() - splash.height() / 2),
+    )
+
+
 def animate_splash_progress(
     splash: SplashScreen,
     app: QApplication,
@@ -35,8 +48,9 @@ def animate_splash_progress(
 
 
 def setup_splash_screen(app: QApplication, config: SplashScreenConfig) -> None:
-    """Set up, animate, and close a splash screen for *app*."""
+    """Set up, center, animate, and close a JDXI-style splash screen."""
     splash = create_splash_screen(config)
+    center_splash_on_screen(splash, app)
     splash.show()
     splash.raise_()
     splash.activateWindow()
