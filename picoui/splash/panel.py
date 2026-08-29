@@ -4,13 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFrame, QLabel, QProgressBar, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QLabel, QProgressBar, QVBoxLayout, QWidget, QHBoxLayout
 
-from picoui.helpers.layout import create_layout_with_items
+from picoui.helpers.layout import (
+    create_layout,
+    create_layout_with_items,
+    create_progress_bar_from_spec,
+)
+from picoui.specs.widgets import LabelSpec
 from picoui.splash.config import SplashScreenConfig
 from picoui.splash.styles import SPLASH_CONTENT_SPACING, SPLASH_PROGRESS_WIDTH_INSET
-from picoui.widget.helper import create_logo_label_from_spec
+from picoui.widget.helper import create_label_from_spec, create_logo_label_from_spec
 
 
 @dataclass(slots=True)
@@ -23,7 +27,20 @@ class SplashPanelWidgets:
     title_label: QLabel
 
 
-def build_jdxi_splash_panel(
+def _add_label_from_spec(
+    layout: QVBoxLayout | QHBoxLayout,
+    spec: LabelSpec | None,
+    parent: QWidget,
+) -> QLabel | None:
+    """Create a label from *spec* and append it to *layout*."""
+    if spec is None:
+        return None
+    label = create_label_from_spec(spec, parent=parent)
+    layout.addWidget(label)
+    return label
+
+
+def build_splash_panel(
     parent: QWidget,
     config: SplashScreenConfig,
     *,
@@ -31,7 +48,7 @@ def build_jdxi_splash_panel(
     show_status: bool | None = None,
 ) -> SplashPanelWidgets:
     """
-    Build the JDXI card panel on *parent*.
+    Build the card panel on *parent*, based on the JDXI splash screen.
 
     Returns the card frame and key child widgets. The title label is created
     parented to *parent* for overlay positioning by the caller.
@@ -41,20 +58,22 @@ def build_jdxi_splash_panel(
 
     card = QFrame(parent)
     card.setObjectName("Card")
-    card_layout = QVBoxLayout(card)
-    card_layout.setContentsMargins(0, 0, 0, 0)
-    card_layout.setSpacing(SPLASH_CONTENT_SPACING)
+    card_layout = create_layout(
+        vertical=True,
+        parent=card,
+        margins=(0, 0, 0, 0),
+        spacing=SPLASH_CONTENT_SPACING,
+    )
 
-    logo = create_logo_label_from_spec(config.logo)
-    logo.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-    card_layout.addWidget(logo)
+    card_layout.addWidget(create_logo_label_from_spec(config.logo))
 
     progress_bar: QProgressBar | None = None
     if include_progress:
-        progress_bar = QProgressBar(card)
-        progress_bar.setRange(0, 100)
-        progress_bar.setValue(0)
-        progress_bar.setFixedWidth(config.dimensions.width - SPLASH_PROGRESS_WIDTH_INSET)
+        progress_bar = create_progress_bar_from_spec(config.progress)
+        progress_bar.setParent(card)
+        progress_bar.setFixedWidth(
+            config.dimensions.width - SPLASH_PROGRESS_WIDTH_INSET
+        )
         card_layout.addLayout(
             create_layout_with_items(
                 items=[progress_bar],
@@ -65,30 +84,14 @@ def build_jdxi_splash_panel(
 
     status_label: QLabel | None = None
     if include_status:
-        status_label = QLabel(config.status_text, card)
-        status_label.setObjectName("StatusLabel")
-        status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        card_layout.addWidget(status_label)
-
-    subtitle_text = config.subtitle.label or ""
-    if subtitle_text:
-        subtitle = QLabel(subtitle_text, card)
-        subtitle.setObjectName("SubtitleLabel")
-        subtitle.setAlignment(
-            config.subtitle.alignment or Qt.AlignmentFlag.AlignCenter
+        status_label = _add_label_from_spec(
+            card_layout, config.status_label_spec(), card
         )
-        subtitle.setWordWrap(config.subtitle.word_wrap)
-        card_layout.addWidget(subtitle)
 
-    if config.credits_text:
-        credits = QLabel(config.credits_text, card)
-        credits.setObjectName("CreditLabel")
-        credits.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        credits.setWordWrap(True)
-        card_layout.addWidget(credits)
+    _add_label_from_spec(card_layout, config.subtitle_panel_spec(), card)
+    _add_label_from_spec(card_layout, config.credits_label_spec(), card)
 
-    title_label = QLabel(config.title, parent)
-    title_label.setObjectName("TitleLabel")
+    title_label = create_label_from_spec(config.title_label_spec(), parent=parent)
 
     return SplashPanelWidgets(
         card=card,

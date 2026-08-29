@@ -165,9 +165,13 @@ def create_button_from_spec(spec: ButtonSpec) -> QPushButton:
     return create_button(spec=spec)
 
 
-def create_label_from_spec(spec: LabelSpec) -> QLabel:
+def create_label_from_spec(
+    spec: LabelSpec, parent: QtWidgets.QWidget | None = None
+) -> QLabel:
     """Create a QLabel from a LabelSpec."""
-    label = QLabel(spec.label or "")
+    label = QLabel(spec.label or "", parent)
+    if spec.object_name:
+        label.setObjectName(spec.object_name)
     if spec.dimensions is not None:
         label.setFixedSize(*spec.dimensions.to_tuple())
     if spec.style is not None:

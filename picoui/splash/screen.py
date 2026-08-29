@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QProgressBar, QVBoxLayout, QWidget
 
 from picoui.splash.config import SplashScreenConfig
-from picoui.splash.panel import build_jdxi_splash_panel
+from picoui.splash.panel import build_splash_panel
 from picoui.splash.styles import (
     SPLASH_STYLESHEET,
     SPLASH_CONTENT_MARGINS,
@@ -40,7 +40,7 @@ class SplashScreen(QWidget):
         root.setContentsMargins(*SPLASH_CONTENT_MARGINS)
         root.setSpacing(SPLASH_CONTENT_SPACING)
 
-        panel = build_jdxi_splash_panel(self, self.config)
+        panel = build_splash_panel(self, self.config)
         self.progress_bar = panel.progress_bar
         self.status_label = panel.status_label
         self.title_label = panel.title_label
