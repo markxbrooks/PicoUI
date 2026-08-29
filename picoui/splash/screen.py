@@ -1,3 +1,12 @@
+"""
+A module to define a customizable splash screen widget.
+
+This module provides a `SplashScreen` class, which creates a spec-driven splash
+screen UI. It is designed to display a logo, subtitle, and optional progress bar,
+with full support for configurable styles and dimensions. Additionally, it provides
+helper functions for applying transparent styles to group box widgets.
+"""
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGroupBox, QProgressBar, QVBoxLayout, QWidget
 
@@ -34,10 +43,10 @@ class SplashScreen(QWidget):
         transparent = _is_transparent_background(self.config.background_color)
         if transparent:
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-            self.setStyleSheet("background: transparent;")
+            self.setStyleSheet("background: transparent; color: white; font-size: 12px;")
         else:
             self.setStyleSheet(
-                f"background-color: {self.config.background_color};"
+                f"background-color: {self.config.background_color}; color: white; font-size: 12px;"
             )
 
         outer = create_layout_with_items(
@@ -56,7 +65,9 @@ class SplashScreen(QWidget):
 
         logo = create_logo_label_from_spec(self.config.logo)
         if transparent:
-            logo.setStyleSheet("background: transparent;")
+            logo.setStyleSheet("background: transparent ;")
+        else:
+            logo.setStyleSheet("background: black; color: white; font-size: 12px;")
         group_layout.addWidget(logo)
         if self.config.show_progress:
             self.progress_bar = create_progress_bar_from_spec(self.config.progress)
@@ -79,5 +90,5 @@ def _apply_transparent_panel_style(widget: QGroupBox) -> None:
     """Remove opaque panel chrome so the splash shows through."""
     existing = widget.styleSheet() or ""
     widget.setStyleSheet(
-        f"{existing} QGroupBox {{ background: transparent; border: none; }}"
+        f"{existing} QGroupBox {{ background: transparent; border: none; color: white; font-size: 12px;}}"
     )

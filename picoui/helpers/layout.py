@@ -87,7 +87,7 @@ def create_progress_bar(range_min: int = 0,
 
 
 def create_layout_with_items(
-    items: List[LayoutItem] | None = None,
+    items: List[LayoutItem | None] | None = None,
     vertical: bool = False,
     start_stretch: bool = True,
     end_stretch: bool = True,
