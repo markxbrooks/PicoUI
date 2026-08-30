@@ -15,7 +15,7 @@ if str(project_root) not in sys.path:
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
-from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QProgressBar
+from PySide6.QtWidgets import QApplication, QGroupBox, QLabel, QProgressBar, QWidget
 
 from picoui.helpers.layout import create_progress_bar_from_spec
 from picoui.specs.widgets import (
@@ -25,9 +25,11 @@ from picoui.specs.widgets import (
     ProgressBarSpec,
 )
 from picoui.splash.config import SplashScreenConfig, group_spec_from_config
+from picoui.splash.panel import build_splash_panel
 from picoui.splash.screen import SplashScreen
 from picoui.widget.helper import (
     create_group_box_from_spec,
+    create_label_from_spec,
     create_logo_label_from_spec,
 )
 
@@ -121,6 +123,47 @@ class TestSplashScreenConfig(unittest.TestCase):
           logo_path="/tmp/legacy.png",
       )
       self.assertEqual(config.logo.path, "/tmp/legacy.png")
+
+
+class TestLabelFromSpec(unittest.TestCase):
+  def setUp(self) -> None:
+      get_qapp()
+
+  def test_object_name_applied(self) -> None:
+      label = create_label_from_spec(
+          LabelSpec(label="Status", object_name="StatusLabel")
+      )
+      self.assertEqual(label.objectName(), "StatusLabel")
+
+
+class TestSplashPanel(unittest.TestCase):
+  def setUp(self) -> None:
+      get_qapp()
+
+  def test_build_jdxi_splash_panel_uses_specs(self) -> None:
+      config = SplashScreenConfig.from_title(
+          title="ElMo",
+          subtitle=LabelSpec(label="Subtitle"),
+          status_text="Loading",
+          credits_text="v1.0",
+      )
+      host = QWidget()
+      panel = build_splash_panel(host, config)
+      self.assertEqual(panel.card.objectName(), "Card")
+      self.assertEqual(panel.title_label.objectName(), "TitleLabel")
+      self.assertEqual(panel.title_label.text(), "ElMo")
+      self.assertIsNotNone(panel.progress_bar)
+      self.assertEqual(panel.status_label.objectName(), "StatusLabel")
+      self.assertEqual(panel.status_label.text(), "Loading")
+
+  def test_build_jdxi_splash_panel_without_progress(self) -> None:
+      config = SplashScreenConfig.from_title(title="About", show_progress=False)
+      host = QWidget()
+      panel = build_splash_panel(
+          host, config, show_progress=False, show_status=False
+      )
+      self.assertIsNone(panel.progress_bar)
+      self.assertIsNone(panel.status_label)
 
 
 class TestSplashScreenWidget(unittest.TestCase):

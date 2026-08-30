@@ -162,6 +162,7 @@ class LabelSpec:
     alignment: Qt.AlignmentFlag | None = None
     word_wrap: bool = False
     tooltip: str | None = None
+    object_name: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

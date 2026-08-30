@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 
+from PySide6.QtCore import Qt
+
 from picoui.dimensions import Dimensions
 from picoui.specs.widgets import (
     GroupBoxSpec,
@@ -58,6 +60,8 @@ class SplashScreenConfig:
     background_color: str = "black"
     foreground_color: str = "white"
     show_progress: bool = True
+    status_text: str = "Starting..."
+    credits_text: str | None = None
 
     @property
     def logo_path(self) -> str | None:
@@ -84,6 +88,8 @@ class SplashScreenConfig:
         background_color: str = "black",
         foreground_color: str = "white",
         show_progress: bool = True,
+        status_text: str = "Starting...",
+        credits_text: str | None = None,
         style: str | None = None,
         logo_path: str | None = None,
     ) -> SplashScreenConfig:
@@ -116,6 +122,8 @@ class SplashScreenConfig:
             background_color=resolved_background,
             foreground_color=foreground_color,
             show_progress=show_progress,
+            status_text=status_text,
+            credits_text=credits_text,
         )
 
     def subtitle_label_spec(self) -> LabelSpec:
@@ -126,3 +134,42 @@ class SplashScreenConfig:
         if base.dimensions is not None:
             return base
         return replace(base, dimensions=dimensions)
+
+    def title_label_spec(self) -> LabelSpec:
+        """Return the overlay title :class:`~picoui.specs.widgets.LabelSpec`."""
+        return LabelSpec(label=self.title, object_name="TitleLabel")
+
+    def status_label_spec(self) -> LabelSpec | None:
+        """Return status line spec, or ``None`` when :attr:`status_text` is empty."""
+        if not self.status_text:
+            return None
+        return LabelSpec(
+            label=self.status_text,
+            object_name="StatusLabel",
+            alignment=Qt.AlignmentFlag.AlignCenter,
+        )
+
+    def credits_label_spec(self) -> LabelSpec | None:
+        """Return credits line spec, or ``None`` when :attr:`credits_text` is unset."""
+        if not self.credits_text:
+            return None
+        return LabelSpec(
+            label=self.credits_text,
+            object_name="CreditLabel",
+            alignment=Qt.AlignmentFlag.AlignCenter,
+            word_wrap=True,
+        )
+
+    def subtitle_panel_spec(self) -> LabelSpec | None:
+        """Return subtitle spec for the card panel, or ``None`` when there is no text."""
+        if not (self.subtitle.label or ""):
+            return None
+        base = self.subtitle
+        alignment = base.alignment or Qt.AlignmentFlag.AlignCenter
+        if base.object_name:
+            return replace(base, alignment=alignment)
+        return replace(
+            base,
+            object_name="SubtitleLabel",
+            alignment=alignment,
+        )
