@@ -8,7 +8,7 @@ helper functions for applying transparent styles to group box widgets.
 """
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QGroupBox, QProgressBar, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QGroupBox, QProgressBar, QWidget
 
 from picoui.helpers.layout import create_layout_with_items, create_progress_bar_from_spec
 from picoui.splash.config import SplashScreenConfig, group_spec_from_config
