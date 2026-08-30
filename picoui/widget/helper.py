@@ -10,7 +10,16 @@ UI initialization.
 from typing import Callable, TypeVar, Optional
 
 import qtawesome as qta
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QFontInfo, QPixmap
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
+                               QDoubleSpinBox, QFileDialog, QFormLayout,
+                               QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+                               QPushButton, QScrollArea, QSpinBox, QTabWidget,
+                               QVBoxLayout, QWidget, QLayout)
 
+from picoui.dimensions import Dimensions
 from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
                             group_with_layout)
 from picoui.icons import IconRegistry
@@ -19,15 +28,6 @@ from picoui.specs.widgets import (ButtonSpec, CheckBoxSpec, ComboBoxSpec,
                                   GroupBoxSpec, LabelSpec, LineEditSpec,
                                   LogoSpec, SpinBoxSpec, TabSpec,
                                   wayland_safe_file_dialog_options, BaseSpinBoxSpec)
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QFontInfo, QPixmap
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
-                               QDoubleSpinBox, QFileDialog, QFormLayout,
-                               QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-                               QPushButton, QScrollArea, QSpinBox, QTabWidget,
-                               QVBoxLayout, QWidget)
-
 TSpinBox = TypeVar("TSpinBox", QSpinBox, QDoubleSpinBox)
 
 TSpinBoxSpec = TypeVar("TSpinBoxSpec", SpinBoxSpec, DoubleSpinBoxSpec)
@@ -60,17 +60,15 @@ def double_spinbox_from_spec(spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
     return spin
 
 
-def create_layout_and_widget(margins: tuple, spacing: int) -> tuple[QHBoxLayout, QWidget]:
+def create_layout_and_widget(margins: tuple, spacing: int) -> tuple[QLayout, QWidget]:
     """create layout and widget"""
     widget = QWidget()
-    layout = QHBoxLayout(widget)
-    layout.setContentsMargins(*margins)
-    layout.setSpacing(spacing)
+    layout = create_layout_with_items(parent=widget, vertical=False, margins=margins, spacing=spacing)
     return layout, widget
 
 
 def create_widget_with_items(items: list, margins: tuple, spacing: int) -> QWidget:
-    """Create widget with items"""
+    """Create a widget with items"""
     widget = QWidget()
     layout = create_layout_with_items(parent=widget,
                                       items=items,
@@ -80,21 +78,23 @@ def create_widget_with_items(items: list, margins: tuple, spacing: int) -> QWidg
     return widget
 
 
-def create_scroll_area() -> QScrollArea:
-    """Create scrollable area for the entire content"""
+def create_scroll_area(resizable: bool = True,
+                       policy_horizontal: Qt.ScrollBarPolicy = Qt.ScrollBarPolicy.ScrollBarAsNeeded,
+                       policy_vertical: Qt.ScrollBarPolicy = Qt.ScrollBarPolicy.ScrollBarAsNeeded) -> QScrollArea:
+    """Create a scrollable area for the entire content"""
     scroll_area = QScrollArea()
-    scroll_area.setWidgetResizable(True)
-    scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-    scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    scroll_area.setWidgetResizable(resizable)
+    scroll_area.setHorizontalScrollBarPolicy(policy_horizontal)
+    scroll_area.setVerticalScrollBarPolicy(policy_vertical)
     return scroll_area
 
 
 def create_button_box(
-    label: str = "OK", parent: QWidget = None
+    label: str = "OK", parent: QWidget = None, dimensions: Dimensions = Dimensions(150, 250, 341, 32)
 ) -> tuple[QDialogButtonBox, QPushButton]:
     """create button box"""
     button_box = QtWidgets.QDialogButtonBox(parent)
-    button_box.setGeometry(QtCore.QRect(150, 250, 341, 32))
+    button_box.setGeometry(QtCore.QRect(*dimensions))
     button_box.setOrientation(QtCore.Qt.Horizontal)
     button_box.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
     button_box.setObjectName("button_box")
@@ -107,7 +107,7 @@ def create_row(
     icon_name: str,
     label_text: str,
     widget: QWidget,
-) -> QHBoxLayout:
+) -> QLayout:
     """create row layout"""
     icon = QLabel()
     icon.setPixmap(IconRegistry.get_icon(icon_name))
@@ -121,10 +121,11 @@ def create_row(
     return layout
 
 
-def create_checkbox(label: Optional[str] = None, value: bool = False) -> QCheckBox:
+def create_checkbox(label: Optional[str] = None, value: bool = False,
+                    layout_direction: QtCore.Qt.LayoutDirection = QtCore.Qt.RightToLeft) -> QCheckBox:
     """Create a checkbox from label and value, or from a CheckBoxSpec."""
     check_box = QCheckBox(label or "")
-    check_box.setLayoutDirection(QtCore.Qt.RightToLeft)
+    check_box.setLayoutDirection(layout_direction)
     check_box.setChecked(bool(value))
     return check_box
 
@@ -141,7 +142,9 @@ def create_checkbox_from_spec(spec: CheckBoxSpec) -> QCheckBox:
     return check_box
 
 
-def create_button(label: Optional[str] = None, tooltip: Optional[str] = None, spec: Optional[ButtonSpec] = None) -> QPushButton:
+def create_button(label: Optional[str] = None,
+                  tooltip: Optional[str] = None,
+                  spec: Optional[ButtonSpec] = None) -> QPushButton:
     """Create a button from label/tooltip or from a ButtonSpec."""
     if spec is not None:
         label = spec.label or ""
@@ -269,9 +272,9 @@ def create_combo_box(
 
 
 def create_combo_row(
-    label: Optional[str] = None, all_items_label: Optional[str] = None, items: Optional[list] = None, slot=None
+    label: str = "", all_items_label: Optional[str] = None, items: Optional[list] = None, slot=None
 ) -> tuple[QHBoxLayout, QComboBox]:
-    """create combo row"""
+    """create a combo row"""
     label_widget = QLabel(label)
     combo = create_combo_box(all_items_label, items, slot)
     widgets = [label_widget, combo]
