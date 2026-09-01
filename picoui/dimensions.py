@@ -46,3 +46,20 @@ def update_layout_with_dimensions(layout: QVBoxLayout | QVBoxLayout, window_dime
     """update layout with dimensions"""
     layout.setContentsMargins(*window_dimensions.margins)
     layout.setSpacing(window_dimensions.spacing)
+
+
+@dataclass(frozen=True)
+class Point:
+    """Point"""
+    x: int
+    y: int
+
+
+@dataclass(frozen=True)
+class WindowGeometry:
+    """WindowGeometry"""
+    position: Point
+    dimensions: Dimensions
+
+    def to_tuple(self):
+        return self.position.x, self.position.y, self.dimensions.width, self.dimensions.height
