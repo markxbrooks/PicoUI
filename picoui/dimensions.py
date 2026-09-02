@@ -22,6 +22,9 @@ class Dimensions:
     spacing: int = 10
     margin: int = 5
 
+    def __str__(self):
+        return f"Dimensions: {self.width} x {self.height}"
+
     @property
     def size(self) -> tuple[int, int]:
         return self.width, self.height
@@ -54,12 +57,18 @@ class Point:
     x: int
     y: int
 
+    def __str__(self):
+        return f"Point at position {self.x}, {self.y}"
+
 
 @dataclass(frozen=True)
 class WindowGeometry:
     """WindowGeometry"""
     position: Point
     dimensions: Dimensions
+
+    def __str__(self):
+        return f"Window geometry at position {self.position.x}, {self.position.y}, size: {self.dimensions.width} x {self.dimensions.height}"
 
     def to_tuple(self):
         return self.position.x, self.position.y, self.dimensions.width, self.dimensions.height
