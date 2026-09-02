@@ -110,14 +110,7 @@ def create_layout_with_items(
     container_layout = create_layout(vertical=vertical, parent=parent)
     if start_stretch:
         container_layout.addStretch()
-    if items is not None:
-        for item in items:
-            # Must not use Union[QWidget, QLayout] with isinstance: QWidget wins for buttons,
-            # so layouts would never be chosen correctly and widgets would get addLayout().
-            if isinstance(item, QLayout):
-                container_layout.addLayout(item)
-            else:
-                container_layout.addWidget(item)
+    add_items_to_layout(container_layout, items)
     if end_stretch:
         container_layout.addStretch()
     if spacing is not None:
@@ -128,6 +121,19 @@ def create_layout_with_items(
         if isinstance(margins, tuple):
             container_layout.setContentsMargins(*margins)
     return container_layout
+
+
+def add_items_to_layout(container_layout: QVBoxLayout | QHBoxLayout,
+                        items: list[QWidget | QHBoxLayout | QVBoxLayout | QProgressBar | QFormLayout | None] | None):
+    """Add items to layout"""
+    if items is not None:
+        for item in items:
+            # Must not use Union[QWidget, QLayout] with isinstance: QWidget wins for buttons,
+            # so layouts would never be chosen correctly and widgets would get addLayout().
+            if isinstance(item, QLayout):
+                container_layout.addLayout(item)
+            else:
+                container_layout.addWidget(item)
 
 
 def create_row_with_widgets(widgets: List[QWidget], spacing: int = 4) -> QHBoxLayout:
