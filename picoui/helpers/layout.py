@@ -4,11 +4,13 @@ Layout assembly utilities for PySide6 UI.
 Provides create_layout, create_layout_with_widgets, create_row_with_widgets,
 and related helpers with consistent typing and behavior.
 """
+from __future__ import annotations
+
 from typing import List, Optional, Union
 
 from PySide6.QtCore import QMargins, Qt
 from PySide6.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QLayout, QVBoxLayout, QWidget, QProgressBar)
+                               QLayout, QVBoxLayout, QWidget, QProgressBar, QSplitter)
 
 from picoui.specs.widgets import ProgressBarSpec
 
@@ -201,7 +203,7 @@ def create_form_layout(parent: Optional[QWidget] = None) -> QFormLayout:
     return layout
 
 
-def create_widget_with_layout(layout: QVBoxLayout) -> QWidget:
+def create_widget_with_layout(layout: QLayout) -> QWidget:
     """create a simple widget with a given layout"""
     widget = QWidget()
     widget.setLayout(layout)
@@ -246,3 +248,17 @@ def create_header_row(
     label_widget.setVisible(show_label)
     row.addWidget(label_widget)
     return row, label_widget
+
+
+def create_splitter_with_items(items: list[QWidget], sizes) -> QSplitter:
+    splitter = QSplitter(Qt.Vertical)
+    for item in items:
+        splitter.addWidget(item)
+    splitter.setSizes(sizes)
+    return splitter
+
+
+def create_widget_layout(widget: QWidget) -> QVBoxLayout:
+    lower_layout = QVBoxLayout()
+    lower_layout.addWidget(widget)
+    return lower_layout
