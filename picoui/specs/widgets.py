@@ -10,7 +10,7 @@ from typing import Any, Callable, List, Optional, Protocol
 from decologr import Decologr as log
 from picoui.dimensions import Dimensions
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout,
                                QVBoxLayout, QWidget)
 
@@ -361,7 +361,7 @@ class ActionSpec:
 
     text: str = ""
     icon: Optional[str] = None
-    qicon: Any = None
+    qicon: QIcon = None
     shortcut: Any = None
     status: str = ""
     triggered: Optional[Callable] = None
