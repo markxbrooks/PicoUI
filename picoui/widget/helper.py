@@ -60,21 +60,38 @@ def double_spinbox_from_spec(spec: DoubleSpinBoxSpec) -> QDoubleSpinBox:
     return spin
 
 
-def create_layout_and_widget(margins: tuple, spacing: int) -> tuple[QLayout, QWidget]:
+def create_layout_and_widget(margins: tuple,
+                             spacing: int,
+                             items: list = None,
+                             start_stretch=True,
+                             end_stretch=True) -> tuple[QLayout, QWidget]:
     """create layout and widget"""
     widget = QWidget()
-    layout = create_layout_with_items(parent=widget, vertical=False, margins=margins, spacing=spacing)
+    layout = create_layout_with_items(parent=widget,
+                                      vertical=False,
+                                      margins=margins,
+                                      spacing=spacing,
+                                      items=items,
+                                      start_stretch=start_stretch,
+                                      end_stretch=end_stretch)
     return layout, widget
 
 
-def create_widget_with_items(items: list, margins: tuple, spacing: int) -> QWidget:
+def create_widget_with_items(items: list,
+                             margins: tuple,
+                             spacing: int,
+                             start_stretch=True,
+                             end_stretch=True) -> QWidget:
     """Create a widget with items"""
     widget = QWidget()
     layout = create_layout_with_items(parent=widget,
                                       items=items,
-                                      end_stretch=True)
-    layout.setContentsMargins(*margins)
-    layout.setSpacing(spacing)
+                                      start_stretch=start_stretch,
+                                      end_stretch=end_stretch)
+    if margins:
+        layout.setContentsMargins(*margins)
+    if spacing:
+        layout.setSpacing(spacing)
     return widget
 
 
