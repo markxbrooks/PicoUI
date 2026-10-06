@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
                                QDoubleSpinBox, QFileDialog, QFormLayout,
                                QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QSpinBox, QTabWidget,
-                               QVBoxLayout, QWidget, QLayout)
+                               QVBoxLayout, QWidget, QLayout, QFrame)
 
 from picoui.dimensions import Dimensions
 from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
@@ -413,3 +413,16 @@ def apply_splash_subtitle_style(label: QLabel, config: "SplashScreenConfig") -> 
         f"font-size: {config.theme.subtitle_size}px;"
         "}"
     )
+
+
+def create_map_info_label(label_text: str,
+                          word_wrap=True,
+                          frame_style: QFrame.Shape = None,
+                          max_height: int = None):
+    map_info_label = QLabel(label_text)
+    map_info_label.setWordWrap(word_wrap)
+    if frame_style:
+        map_info_label.setFrameStyle(frame_style)
+    if max_height:
+        map_info_label.setMaximumHeight(max_height)
+    return map_info_label
