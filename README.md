@@ -69,14 +69,39 @@ vbox = create_vertical_layout(spacing=8)
 form = create_form_layout()
 ```
 
+### CLI SpecEditor (MxLib KeywordSpecs)
+
+Edit command-line flags/options for crystallography programs that use MxLib
+keyword catalogs (`FlagSpec` / `OptionSpec` / `AssignmentSpec`):
+
+```python
+from picoui.widget.spec_editor import SpecEditor
+from picoui.specs.cli import SpecField, SpecFieldKind, SpecValueType
+
+editor = SpecEditor(
+    fields=[
+        SpecField("pdb_file", SpecFieldKind.OPTION, token="-p",
+                  value_type=SpecValueType.PATH, group="Inputs"),
+        SpecField("autoncs", SpecFieldKind.FLAG, token="-autoncs",
+                  value_type=SpecValueType.BOOL, group="Flags"),
+    ],
+    program="refine",
+)
+editor.set_values({"pdb_file": "model.pdb", "autoncs": True})
+print(editor.argv())  # ['refine', '-p', 'model.pdb', '-autoncs']
+
+# Or bind an MxLib catalog:
+# SpecEditor.from_keyword_specs(BusterKeywordSpecs, program="refine")
+```
+
 ## Project Structure
 
 ```
 picoui/
 ├── helpers/        # Layout and group box utilities
-├── specs/          # Dataclass specs for widgets (ButtonSpec, CheckBoxSpec, etc.)
+├── specs/          # Dataclass specs for widgets + CLI SpecField
 ├── dialogs/        # Preferences dialog base and helpers
-├── widget/         # Widget creation helpers and setters
+├── widget/         # Widget helpers, SpecEditor, setters
 ├── tooltip/        # Tooltip management
 ├── dimensions.py   # Standard UI dimensions
 ├── icons.py        # Icon registry
