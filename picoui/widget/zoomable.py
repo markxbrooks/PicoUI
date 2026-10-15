@@ -1,4 +1,4 @@
-"""Shared pan/zoom canvas used by ElMo Reflection Viewer and qtMosflm."""
+"""Shared pan/zoom canvas used by ElMo Reflection Viewer and DiffractionLab."""
 
 from __future__ import annotations
 

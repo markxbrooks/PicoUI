@@ -141,7 +141,7 @@ class IconRegistry:
     ZOOM_OUT = "msc.zoom-out"
     SCREEN_NORMAL = "msc.screen-normal"
     FIT_TO_PAGE = "mdi.fit-to-page-outline"
-    # Diffraction / crystal viewer readouts (qtMosflm)
+    # Diffraction / crystal viewer readouts (DiffractionLab)
     CROSSHAIRS = "mdi.crosshairs"
     CROSSHAIRS_GPS = "mdi.crosshairs-gps"
     AXIS_X_ARROW = "mdi.axis-x-arrow"
