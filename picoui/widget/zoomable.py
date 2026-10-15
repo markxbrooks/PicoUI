@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from PySide6.QtCore import QPointF, Qt, Signal
-from PySide6.QtGui import QColor, QMouseEvent, QPainter, QWheelEvent
+from PySide6.QtGui import QColor, QCursor, QMouseEvent, QPainter, QWheelEvent
 from PySide6.QtWidgets import QWidget
 
 
@@ -89,12 +89,13 @@ def fit_transform(
 
 
 class ZoomableCanvas(QWidget):
-    """QWidget base with Reflection-Viewer-style wheel zoom and pan.
+    """QWidget base with Reflection-Viewer-style wheel zoom and hand pan.
 
     Interaction contract (shared look-and-feel):
 
     * Mouse wheel — zoom ×1.15 / ÷1.15, cursor-anchored
-    * Middle-drag or Shift+Left-drag — pan
+    * Left-drag — pan with open/closed hand cursor (short click still selects)
+    * Middle-drag or Shift+Left-drag — pan immediately
     * :meth:`reset_view` / :meth:`zoom_in` / :meth:`zoom_out` — toolbar actions
 
     Subclasses implement :meth:`paint_contents` and optionally
@@ -104,6 +105,8 @@ class ZoomableCanvas(QWidget):
     view_changed = Signal()
     ZOOM_FACTOR = 1.15
     MIN_SCALE = 1e-3
+    #: Pixels of left-button travel before a click becomes a hand-pan.
+    PAN_DRAG_THRESHOLD_PX = 4.0
 
     def __init__(self, parent: QWidget | None = None, *, flip_y: bool = True) -> None:
         super().__init__(parent)
@@ -113,11 +116,18 @@ class ZoomableCanvas(QWidget):
         self._transform = ViewTransform(flip_y=flip_y)
         self._drag_origin: QPointF | None = None
         self._drag_center: tuple[float, float] | None = None
+        self._panning = False
+        self._pending_left_pan = False
         self._background = QColor(30, 30, 34)
+        self._set_idle_cursor()
 
     def transform(self) -> ViewTransform:
         """Return a copy of the current view transform."""
         return self._transform.copy()
+
+    def is_panning(self) -> bool:
+        """True while an active hand/middle pan drag is in progress."""
+        return self._panning
 
     def set_background(self, color: QColor | str) -> None:
         """Set the canvas fill color behind content."""
@@ -150,6 +160,44 @@ class ZoomableCanvas(QWidget):
 
     def on_left_click(self, world_u: float, world_v: float, event: QMouseEvent) -> None:
         """Handle a plain left click in world coordinates (optional)."""
+
+    def _set_idle_cursor(self) -> None:
+        self.setCursor(QCursor(Qt.CursorShape.OpenHandCursor))
+
+    def _set_grab_cursor(self) -> None:
+        self.setCursor(QCursor(Qt.CursorShape.ClosedHandCursor))
+
+    def _begin_pan(self, origin: QPointF) -> None:
+        self._drag_origin = QPointF(origin)
+        self._drag_center = (
+            self._transform.center_u,
+            self._transform.center_v,
+        )
+        self._panning = True
+        self._pending_left_pan = False
+        self._set_grab_cursor()
+
+    def _end_pan(self, *, emit_changed: bool) -> None:
+        was_panning = self._panning
+        self._drag_origin = None
+        self._drag_center = None
+        self._panning = False
+        self._pending_left_pan = False
+        self._set_idle_cursor()
+        if was_panning and emit_changed:
+            self.view_changed.emit()
+
+    def _apply_pan_delta(self, pos: QPointF) -> None:
+        if self._drag_origin is None or self._drag_center is None:
+            return
+        delta = pos - self._drag_origin
+        scale = max(self._transform.scale, self.MIN_SCALE)
+        self._transform.center_u = self._drag_center[0] - delta.x() / scale
+        if self._transform.flip_y:
+            self._transform.center_v = self._drag_center[1] + delta.y() / scale
+        else:
+            self._transform.center_v = self._drag_center[1] - delta.y() / scale
+        self.update()
 
     def _sync_transform_size(self) -> None:
         self._transform.width = max(self.width(), 1)
@@ -184,6 +232,16 @@ class ZoomableCanvas(QWidget):
         self._sync_transform_size()
         self.update()
 
+    def enterEvent(self, event) -> None:  # noqa: N802
+        super().enterEvent(event)
+        if not self._panning:
+            self._set_idle_cursor()
+
+    def leaveEvent(self, event) -> None:  # noqa: N802
+        super().leaveEvent(event)
+        if not self._panning:
+            self.unsetCursor()
+
     def wheelEvent(self, event: QWheelEvent) -> None:  # noqa: N802
         delta = event.angleDelta().y()
         if delta == 0:
@@ -195,35 +253,46 @@ class ZoomableCanvas(QWidget):
     def mousePressEvent(self, event: QMouseEvent) -> None:  # noqa: N802
         if event.button() == Qt.MouseButton.MiddleButton or (
             event.button() == Qt.MouseButton.LeftButton
-            and event.modifiers() & Qt.KeyboardModifier.ShiftModifier
+            and bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         ):
-            self._drag_origin = event.position()
+            self._begin_pan(event.position())
+            return
+        if event.button() == Qt.MouseButton.LeftButton:
+            # Defer click vs pan until we see enough motion (hand grabber).
+            self._drag_origin = QPointF(event.position())
             self._drag_center = (
                 self._transform.center_u,
                 self._transform.center_v,
             )
-            return
-        if event.button() == Qt.MouseButton.LeftButton:
-            wu, wv = self._transform.screen_to_world(
-                event.position().x(), event.position().y()
-            )
-            self.on_left_click(wu, wv, event)
+            self._pending_left_pan = True
+            self._panning = False
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:  # noqa: N802
-        if self._drag_origin is None or self._drag_center is None:
+        if self._pending_left_pan and self._drag_origin is not None:
+            delta = event.position() - self._drag_origin
+            if (
+                abs(delta.x()) >= self.PAN_DRAG_THRESHOLD_PX
+                or abs(delta.y()) >= self.PAN_DRAG_THRESHOLD_PX
+            ):
+                self._panning = True
+                self._pending_left_pan = False
+                self._set_grab_cursor()
+        if not self._panning or self._drag_origin is None or self._drag_center is None:
             return
-        delta = event.position() - self._drag_origin
-        scale = max(self._transform.scale, self.MIN_SCALE)
-        self._transform.center_u = self._drag_center[0] - delta.x() / scale
-        if self._transform.flip_y:
-            self._transform.center_v = self._drag_center[1] + delta.y() / scale
-        else:
-            self._transform.center_v = self._drag_center[1] - delta.y() / scale
-        self.update()
+        self._apply_pan_delta(event.position())
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:  # noqa: N802
-        del event
-        if self._drag_origin is not None:
-            self._drag_origin = None
-            self._drag_center = None
-            self.view_changed.emit()
+        if event.button() not in (
+            Qt.MouseButton.LeftButton,
+            Qt.MouseButton.MiddleButton,
+        ):
+            return
+        if self._pending_left_pan and not self._panning:
+            # Treat as a click (Reflection Viewer selection, etc.).
+            origin = self._drag_origin
+            self._end_pan(emit_changed=False)
+            if origin is not None:
+                wu, wv = self._transform.screen_to_world(origin.x(), origin.y())
+                self.on_left_click(wu, wv, event)
+            return
+        self._end_pan(emit_changed=True)
