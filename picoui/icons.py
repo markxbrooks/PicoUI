@@ -147,6 +147,7 @@ class IconRegistry:
     AXIS_X_ARROW = "mdi.axis-x-arrow"
     AXIS_Y_ARROW = "mdi.axis-y-arrow"
     ANGLE_ACUTE = "mdi.angle-acute"
+    WAVELENGTH = "mdi.sine-wave"
     RULER = "mdi.ruler"
     CIRCLE_OUTLINE = "mdi.circle-outline"
     IMAGE_FILTER_CENTER = "mdi.image-filter-center-focus-strong"
