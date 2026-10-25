@@ -27,6 +27,7 @@ def create_layout(
     :param margins: tuple of margins e.g. (0, 0, 0, 0)
     :param vertical: If True, create QVBoxLayout; else QHBoxLayout.
     :param parent: Optional widget to set as the layout's parent.
+    :param spacing: Optional spacing.
     :return: The created layout.
     """
     layout_cls = QVBoxLayout if vertical else QHBoxLayout
