@@ -6,6 +6,7 @@ These functions simplify the creation and configuration of commonly used
 Qt widgets, allowing for consistent layout structures and streamlined
 UI initialization.
 """
+from __future__ import annotations
 
 from typing import Callable, TypeVar, Optional
 
@@ -17,7 +18,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialogButtonBox,
                                QDoubleSpinBox, QFileDialog, QFormLayout,
                                QGroupBox, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QSpinBox, QTabWidget,
-                               QVBoxLayout, QWidget, QLayout, QFrame)
+                               QVBoxLayout, QWidget, QLayout, QFrame, QTextEdit)
 
 from picoui.dimensions import Dimensions
 from picoui.helpers import (create_layout_with_items, create_row_with_widgets,
@@ -443,3 +444,34 @@ def create_map_info_label(label_text: str,
     if max_height:
         map_info_label.setMaximumHeight(max_height)
     return map_info_label
+
+
+def create_label(label: str, margin: int = 0, object_name: str = None, style_sheet: str = None) -> QLabel:
+    """
+    create_label
+    :param label: str
+    :param margin: int
+    :param object_name: str
+    :param style_sheet: str
+    :return:
+    """
+    title = QLabel(label, margin=margin)
+    if object_name is not None:
+        title.setObjectName(object_name)
+    if style_sheet is not None:
+        title.setStyleSheet(style_sheet)
+    return title
+
+
+def create_text_edit(readonly: bool = False, line_wrap_mode: LineWrapMode = None) -> QTextEdit:
+    """
+
+    :param readonly: bool
+    :param line_wrap_mode:
+    :return: QTextEdit
+    """
+    text_edit = QTextEdit()
+    text_edit.setReadOnly(readonly)
+    if line_wrap_mode is not None:
+        text_edit.setLineWrapMode(line_wrap_mode)
+    return text_edit
